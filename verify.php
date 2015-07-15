@@ -6,6 +6,7 @@
  * @copyright  Copyright (c) 2015.
  */
 class core_verify{
+
 	
 	
 
