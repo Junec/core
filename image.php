@@ -1,6 +1,6 @@
 <?php
 /**
- * Í¼Ïñ´¦Àí
+ * å›¾åƒå¤„ç†
  *
  * @author June Chen <594553417@qq.com>
  * @copyright  Copyright (c) 2015.
