@@ -6,22 +6,17 @@
  * @copyright  Copyright (c) 2015.
 */
 class core_database_client_pdo{
-
-    protected $server = 'localhost';
-    protected $username = 'root';
-    protected $password = '';
-    protected $language = 'utf8';
-    protected $port = 3306;
-    protected $database = '';
+    private $pdo;
+    private $dsn = '';
+    private $username = 'root';
+    private $password = '';
 
 
-    public function __construct($options = array()){
-        $this->server   = $options['server'];
+
+    public function __construct($dsn = '',$options = array()){
+        $this->dsn      = $dsn;
         $this->username = $options['username'];
         $this->password = $options['password'];
-        $this->language = $options['language'] == '' ? $this->language : $options['language'];
-        $this->port     = $options['port'] == '' ? $this->port : $options['port'];
-        $this->database = $options['database'];
         $this->connect();
     }
 
@@ -33,7 +28,12 @@ class core_database_client_pdo{
      * @return bool
      */
     protected function connect(){
+        try{
+            $this->pdo = new PDO($this->dsn,$this->username,$this->password);
 
+        }catch(PDOException $e){
+            throw new core_exception( $e->getMessage() );
+        }
     }
 
 
@@ -44,49 +44,55 @@ class core_database_client_pdo{
 	 * @return resource
 	 */
     public function query($sql = ''){
+        if(!$sql) return false;
+        $result = $this->pdo->query($sql);
+        if ($result instanceof PDOStatement) {
+            $result->setFetchMode(PDO::FETCH_ASSOC);
+        }else{
+            if($this->pdo->errorCode() !== '00000'){
+                throw new core_exception( join(',',$this->pdo->errorInfo()) );
+            }
+        }
+        return $result;
+    }
 
+    /**
+     * 
+     * 
+     * @param string $sql
+     * @return resource
+     */
+    public function exec($sql = ''){
+        if(!$sql) return false;
+        $result = $this->pdo->exec($sql);
+        if ($result instanceof PDOStatement) {
+            $result->setFetchMode(PDO::FETCH_ASSOC);
+        }else{
+            if($this->pdo->errorCode() !== '00000'){
+                throw new core_exception( join(',',$this->pdo->errorInfo()) );
+            }
+        }
+        return $result;
     }
     
 
     /**
-	 * 开启事务
-	 * 
-	 * @return bool
-	 */
-    public function begin(){
-
-    }
-
-
-    /**
-	 * 回滚事务
-	 * 
-	 * @return bool
-	 */
-    public function rollback(){
-
-    }
-
-
-    /**
-	 * 提交事务
-	 * 
-	 * @return bool
-	 */
-    public function commit(){
-
-    }
-
-
-
-    /**
      * 格式化资源数据为数组
      * 
-     * @param resource $resource
+     * @param object $PDOStatement
      * @return array
      */
-    public function fetch($resource){
-
+    public function fetch($PDOStatement){
+        $result = array();
+        
+        $data = $PDOStatement->fetch();
+        if($data){
+            $result = $data;
+            $data = null;
+        }else{
+            $PDOStatement->closeCursor();
+        }
+        return $result;
     }
 
 }

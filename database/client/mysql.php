@@ -35,7 +35,7 @@ class core_database_client_mysql{
     protected function connect(){
         $this->resource = mysql_connect($this->server,$this->username,$this->password,MYSQL_CLIENT_COMPRESS);
         if(!$this->resource){
-            $this->error(mysql_errno(),mysql_error());
+            throw new core_exception(mysql_errno().' : '.mysql_error());
         }
         mysql_select_db($this->database,$this->resource);
         $this->query("SET NAMES ".$this->language);
@@ -53,44 +53,9 @@ class core_database_client_mysql{
         if(!$sql) return false;
         $result = mysql_query($sql);
         if(!$result){
-            $this->error(mysql_errno(),mysql_error());
+            throw new core_exception(mysql_errno().' : '.mysql_error());
         }
         return $result;
-    }
-    
-
-    /**
-	 * 开启事务
-	 * 
-	 * @return bool
-	 */
-    public function begin(){
-        $this->query('START TRANSACTION');
-        return true;
-    }
-
-
-    /**
-	 * 回滚事务
-	 * 
-	 * @return bool
-	 */
-    public function rollback(){
-        $this->query('ROLLBACK');
-        $this->query('END');
-        return true;
-    }
-
-
-    /**
-	 * 提交事务
-	 * 
-	 * @return bool
-	 */
-    public function commit(){
-        $this->query('COMMIT');
-        $this->query('END');
-        return true;
     }
 
 

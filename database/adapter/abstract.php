@@ -6,21 +6,40 @@
  * @copyright  Copyright (c) 2015.
 */
 abstract class core_database_adapter_abstract{
-	/**
-	 * 数据转义
-	 * 
-	 * @param string $string 字符串数据
-	 * @return string
-	 */
-    public function escapeString($string = ''){
-    	return $string;
-        #return mysql_real_escape_string($string);
+   
+    /**
+     * 开启事务
+     * 
+     * @return bool
+     */
+    public function begin(){
+        $this->exec('START TRANSACTION');
+        return true;
     }
 
 
-    protected function error($errno = '' , $error = ''){
-    	$message = $errno.' : '.$error;
-    	core_handler::errorlog($message);
-        exit;
+    /**
+     * 回滚事务
+     * 
+     * @return bool
+     */
+    public function rollback(){
+        $this->exec('ROLLBACK');
+        $this->exec('END');
+        return true;
     }
+
+
+    /**
+     * 提交事务
+     * 
+     * @return bool
+     */
+    public function commit(){
+        $this->exec('COMMIT');
+        $this->exec('END');
+        return true;
+    }
+
+
 }

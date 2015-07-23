@@ -17,27 +17,11 @@ interface core_database_adapter_interface{
 
 
     /**
-	 * 开启事务
 	 * 
-	 * @return bool
-	 */
-    public function begin();
-    
-
-    /**
-	 * 回滚事务
 	 * 
-	 * @return bool
+	 * @return array
 	 */
-    public function rollback();
-    
-
-    /**
-	 * 提交事务
-	 * 
-	 * @return bool
-	 */
-    public function commit();
+    public function exec($sql = '');
 
 
     /**

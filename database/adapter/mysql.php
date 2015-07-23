@@ -29,34 +29,8 @@ class core_database_adapter_mysql extends core_database_adapter_abstract impleme
     	return $this->client->query($sql);
     }
 
-
-    /**
-	 * 开启事务
-	 * 
-	 * @return bool
-	 */
-    public function begin(){
-    	return $this->client->begin();
-    }
-    
-
-    /**
-	 * 回滚事务
-	 * 
-	 * @return bool
-	 */
-    public function rollback(){
-    	return $this->client->rollback();
-    }
-    
-
-    /**
-	 * 提交事务
-	 * 
-	 * @return bool
-	 */
-    public function commit(){
-    	return $this->client->commit();
+    public function exec($sql = ''){
+        return $this->client->exec($sql);
     }
 
 
