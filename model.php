@@ -148,7 +148,7 @@ abstract class core_model{
      * @return miexd
      */
     public function count($filter = array()){
-        return $this->db->count( $this->table ,$this->filter( $filter ));
+        
     }
 
     /**
@@ -158,7 +158,7 @@ abstract class core_model{
      * @return miexd
      */
     public function insert($data = array()){
-        return $this->db->insert( $this->table ,$data);
+        
     }
 
     /**
@@ -169,7 +169,7 @@ abstract class core_model{
      * @return miexd
      */
     public function update($data = array(),$filter = array()){
-        return $this->db->update( $this->table ,$data,$this->filter( $filter ));
+        
     }
 
     /**
@@ -179,7 +179,7 @@ abstract class core_model{
      * @return miexd
      */
     public function delete($filter = array()){
-        return $this->db->delete( $this->table ,$this->filter( $filter ));
+        
     }
 
     /**
