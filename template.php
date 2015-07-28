@@ -5,7 +5,7 @@
  * @author Chen Jun <594553417@qq.com>
  * @copyright  Copyright (c) 2015.
 */
-class core_template_factory_template extends core_template_abstract implements core_template_interface{
+class core_template{
 
     /** 版本 **/
     const VESSION = '1.0';

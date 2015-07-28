@@ -6,39 +6,52 @@
  * @copyright  Copyright (c) 2015.
 */
 abstract class core_database_adapter_abstract{
-   
-    /**
-     * 开启事务
-     * 
-     * @return bool
-     */
+    public $client;
+
     public function begin(){
         $this->exec('START TRANSACTION');
         return true;
     }
 
-
-    /**
-     * 回滚事务
-     * 
-     * @return bool
-     */
     public function rollback(){
         $this->exec('ROLLBACK');
         $this->exec('END');
         return true;
     }
 
-
-    /**
-     * 提交事务
-     * 
-     * @return bool
-     */
     public function commit(){
         $this->exec('COMMIT');
         $this->exec('END');
         return true;
+    }
+
+    public function query($sql = ''){
+        return $this->client->query($sql);
+    }
+
+    public function exec($sql = ''){
+        return $this->client->exec($sql);
+    }
+
+    public function fetch(){
+        return $this->client->fetch();
+    }
+
+    public function fetchAll(){
+        $result = array();
+        while($temp = $this->fetch()){
+            if($temp){
+                foreach($temp as $k=>$v) $data[$k] = $v;
+                $result[] = $data;
+                $data = null;
+            }
+        }
+        return $result;
+    }
+
+    public function select($sql = ''){
+        $this->query($sql);
+        return $this->fetchAll();
     }
 
 

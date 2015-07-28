@@ -29,7 +29,7 @@ interface core_database_adapter_interface{
 	 * 
 	 * @return array
 	 */
-    public function fetch($resource = '');
+    public function fetch();
 
 
     /**
@@ -37,7 +37,7 @@ interface core_database_adapter_interface{
 	 * 
 	 * @return array
 	 */
-    public function fetchAll($resource = '');
+    public function fetchAll();
 
 }
 
