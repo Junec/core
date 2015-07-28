@@ -126,7 +126,7 @@ class core{
      */
     public static function render(){
         core_debug::info("load template: ".core::getConfig('tpl_client'));
-        $render = core_template_client::factory(core::getConfig('tpl_client'),$options);
+        $render = core::instance('core_template');
         $render->template_dir = core::getConfig('template_dir');
         $render->compile_dir = core::getConfig('compile_dir');
         $render->tpl_left_delim = core::getConfig('tpl_left_delim');

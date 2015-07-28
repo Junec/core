@@ -39,6 +39,7 @@ class core_template{
         '\/if',
     );
 
+    //tudo: 未实现
     private $regFunctions = array();
 
 
@@ -74,7 +75,7 @@ class core_template{
     private function compile($tpl = ''){
         $tplFile = $this->getTplPath($tpl);
         $compileFile = $this->getCompilePath($tpl);
-        $tplContent = core::i('core_file')->read( $tplFile );
+        $tplContent = core::instance('core_file')->read( $tplFile );
 
         $this->parseVar($tplContent);
         $this->parseTag($tplContent);
@@ -83,7 +84,7 @@ class core_template{
         $expireTime = time();
         $tplHeader = "<?php \n/* \nCore Template Compile \nCreated on: ".date('Y-m-d H:i:s',$expireTime)." \n*/ \n\$this->checkCompile('$tpl','$md5','$expireTime');\n?>\n";
         $tplContent = $tplHeader.$tplContent;
-        core::i('core_file')->write( $compileFile, $tplContent );
+        core::instance('core_file')->write( $compileFile, $tplContent );
     }
 
 
