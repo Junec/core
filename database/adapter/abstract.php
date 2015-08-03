@@ -55,4 +55,8 @@ abstract class core_database_adapter_abstract{
     }
 
 
+    public function getInsertId(){
+        return $this->client->getInsertId();
+    }
+
 }

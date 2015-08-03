@@ -8,8 +8,8 @@
 abstract class core_model{
     public $table = '';
     public $dbConfig = array();
-    public $db;
     public $pri;
+    private $db;
 
     /**
 	 * 构造函数
@@ -17,12 +17,12 @@ abstract class core_model{
 	 * @return void
 	 */
     public function __construct(){
-        if(!$this->dbConfig){
-            $this->dbConfig = core::getConfig('db_config');
-        }
-
+        if(!$this->dbConfig) $this->dbConfig = core::getConfig('db_config');
         $this->db = core_database_factory::getInstance('pdo',$this->dbConfig);
-        #$this->pri = $this->db->getTablePri($this->table);
+    }
+
+    public function getdb(){
+        return $this->db;
     }
 
 
@@ -65,13 +65,13 @@ abstract class core_model{
                     case '>':
                         $tsql = ' AND '.$fieldName.' '.$link.' \''.$value.'\'';
                     break;
-                    case 'likeBefore':
+                    case '%~':
                         $tsql = ' AND '.$fieldName.' like \'%'.$value.'\'';
                     break;
-                    case 'likeAfter':
+                    case '~%':
                         $tsql = ' AND '.$fieldName.' like \''.$value.'%\'';
                     break;
-                    case 'like':
+                    case '%':
                         $tsql = ' AND '.$fieldName.' like \'%'.$value.'%\'';
                     break;
                     case 'in':
@@ -83,8 +83,8 @@ abstract class core_model{
                 }
                 $where .= $tsql;
             }
-        }else{
-            $where .= $filter;
+        }elseif(!empty($filter)){
+            $where .= ' AND '.$filter;
         }
         return $where;
     }
@@ -92,54 +92,64 @@ abstract class core_model{
     /**
 	 * 查询列表数据
 	 * 
-     * @param string $table     操作表名
      * @param string $field     返回字段
      * @param string $filter    filter过滤条件
      * @param number $offset    offset
      * @param number $limit     limit
-     * @param string $order     排序 如：id DESC
+     * @param string $orderby   排序 如：id DESC
+     * @param string $groupby
 	 * @return mixed
 	 */
-    public function getList($field = '*',$filter = '',$offset = 0,$limit = '-1',$orderby = '',$groupby = ''){
+    public function getList($filter = '',$field = '*',$offset = 0,$limit = '-1',$orderby = '',$groupby = ''){
         $field = empty($field)?'*':$field;
-        $_filter = $this->filter( $filter );
-        $filter = (empty($_filter) ? ' 1 ' : $_filter);
+        $where = $this->filter( $filter );
         $offset = empty($offset) ? 0: $offset;
         if( !empty($limit) && $limit != '-1' ) $_limit = $offset.','.$limit;
-        $result = $this->db->select($this->table,$field,$filter,$orderby,$_limit,$groupby);
+        $sql = "SELECT {$field} FROM {$this->table} WHERE {$where}";
+        if(!empty($orderby)) $sql .= " ORDER BY {$orderby}";
+        if(!empty($groupby)) $sql .= " GROUP BY {$groupby}";
+        if(!empty($_limit))  $sql .= " LIMIT {$_limit}";
+        $result = $this->db->select($sql);
         return $result;
+    }
+
+
+    /**
+     * 查询单条数据
+     *
+     * @param array $filter
+     * @return miexd
+     */
+    public function getOne($filter = '',$field = '*',$orderby='',$groupby = ''){
+        if(is_array($filter) || is_string($filter)){
+            $filter = $filter;
+        }elseif(is_numeric($filter)){
+            $filter = array($this->pri => $filter);
+        }
+        $data = $this->getList($filter,$field,0,1,$orderby,$groupby);
+        if(is_array($data) && isset($data[0])) return $data[0];
+        else return array();
     }
 
 
     /**
 	 * 保存数据
 	 * 
-     * 判断传入sdf标准结构内是否含有主键，如有主键则update，无主键则insert。
-     * @param array $sdf     标准结构
+     * 判断传入标准结构内是否含有主键，如有主键则update，无主键则insert。
+     * @param array $data     标准结构
 	 * @return mixed
 	 */
-    public function save(&$sdf=array()){
-        $rs = true;
-        $pri_id = $sdf[$this->pri];
-        if(isset($sdf[$this->pri]) && $sdf[$this->pri]!= ''){
-            $filter = array($this->pri=>$pri_id);
-            $_s = $this->getOne($filter,$this->pri);
-            if( isset($_s[$this->pri]) && $_s[$this->pri]!='' ){
-                if( $this->update($sdf,$filter) ) $rs = true;
-                else $rs = false;
-            }else{
-                if( $this->insert($sdf) === false ) $rs = false;
-                else $rs = true;
-            }
+    public function save(&$data=array()){
+        if( !$data ) return false;
+        if(isset($data[$this->pri]) && $data[$this->pri]!= ''){
+            $filter = array($this->pri=>$data[$this->pri]);
+            $result = $this->update($data,$filter);
         }else{
-            if( $this->insert($sdf) ){
-                $sdf[$this->pri] = $this->db->getInstance()->getInsertId();
-                $rs = true;
-            }else{
-                $rs = false;
+            if( $result = $this->insert($data) ){
+                $data[$this->pri] = $result;
             }
         }
-        return $rs;
+        return $result;
     }
 
     /**
@@ -149,17 +159,37 @@ abstract class core_model{
      * @return miexd
      */
     public function count($filter = array()){
-        
+        $where = $this->filter($filter);
+        $sql = "SELECT COUNT(*) AS _count FROM {$this->table} WHERE {$where}";
+        $result = $this->getdb()->select($sql);
+        return $result[0]['_count'];
     }
 
     /**
      * 插入
      *
-     * @param array $data 数据
+     * @param array $datas 数据(支持批量插入)
      * @return miexd
      */
-    public function insert($data = array()){
-        
+    public function insert($datas = array()){
+        if( !$datas ) return false;
+        $insertId = array();
+        if( !isset($datas[0]) ){
+            $datas = array($datas);
+        }
+        foreach($datas as $data){
+            $valueSql = $fieldSql = array();
+            foreach($data as $field=>$value){
+                $fieldSql[] =  '`'.trim($field).'`';
+                $valueSql[] =  $value===NULL?'null':"'".$value."'";
+            }
+            $fieldSql = join(',',$fieldSql);
+            $valueSql = join(',',$valueSql);
+            $sql = "INSERT INTO {$this->table}({$fieldSql}) VALUES({$valueSql})";
+            $this->getdb()->exec($sql);
+            $insertId[] = $this->getdb()->getInsertId();
+        }
+        return count($insertId) > 1 ? $insertId : $insertId[0];
     }
 
     /**
@@ -170,7 +200,16 @@ abstract class core_model{
      * @return miexd
      */
     public function update($data = array(),$filter = array()){
-        
+        $where = $this->filter($filter);
+        if(!$data) return false;
+        $fieldSql = '';
+        foreach($data as $k=>$v){
+            $fieldSql[] = $v==NULL?'`'.$k.'`'.'= null':'`'.$k.'`'.'=\''.$v.'\'';
+        }
+        $fieldSql = join(',',$fieldSql);
+        $sql = "UPDATE {$this->table} SET {$fieldSql} WHERE {$where}";
+        $result = $this->getdb()->exec($sql);
+        return empty($result)? false : $result;
     }
 
     /**
@@ -180,26 +219,12 @@ abstract class core_model{
      * @return miexd
      */
     public function delete($filter = array()){
-        
+        $where = $this->filter($filter);
+        $sql = "DELETE FROM {$this->table} WHERE {$where}";
+        $result = $this->getdb()->exec($sql);
+        return empty($result)? false : $result;
     }
 
-    /**
-     * 查询单条数据
-     *
-     * @param array $filter
-     * @return miexd
-     */
-    public function getOne($filter = array(),$field = '*',$orderby=''){
-        if(is_array($filter)){
-            $filter = $filter;
-        }else{
-            $filter = array(
-                $this->pri => $filter,
-            );
-        }
-        $data = $this->getList($field,$filter,0,1,$orderby);
-        if(is_array($data) && isset($data[0])) return $data[0];
-        else return array();
-    }
+    
 
 }

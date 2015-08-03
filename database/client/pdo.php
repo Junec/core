@@ -123,5 +123,10 @@ class core_database_client_pdo{
     }
 
 
+    public function getInsertId(){
+        return $this->pdo->lastInsertId();
+    }
+
+
 
 }
