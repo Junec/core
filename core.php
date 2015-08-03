@@ -75,14 +75,11 @@ class core{
      * 
      * @return void
      */
-    public static function run(){
-        self::exec();
-    }
-    public static function exec(){
+    public static function dispatch(){
         if(self::isCli() == true) return false;
-        $controllerName = 'ctl_'.self::$boot[ self::getConfig('mvc_controller') ];
+        $controllerName = self::$boot[ self::getConfig('mvc_controller') ];
         $action = self::$boot[ self::getConfig('mvc_action') ];
-        $controller = new $controllerName;
+        $controller = self::getController($controllerName);
         $hashkey = core_debug::info('exec controller: '.$controllerName.'::'.$action.'() , run ...');
         $controller->exec($action);
         core_debug::info('exec controller: '.$controllerName.'::'.$action.'() , end .',$hashkey);
@@ -105,14 +102,12 @@ class core{
 
         $controller = $get[ self::$config['mvc_controller'] ];
         $action = $get[ self::$config['mvc_action'] ];
-
         if($controller == '') $controller = self::$config['default_controller'];
         if($action == '') $action = self::$config['default_action'];
 
         self::$boot[ self::$config['mvc_controller'] ] = $controller;
         self::$boot[ self::$config['mvc_action'] ] = $action;
         self::$boot['pathinfo'] = $pathinfo;
-
         core_debug::info('pathinfo: '.$pathinfo);
         core_debug::info('queryString: '.$queryString);
     }
@@ -125,7 +120,6 @@ class core{
      * @return object
      */
     public static function render(){
-        core_debug::info("load template: ".core::getConfig('tpl_client'));
         $render = core::instance('core_template');
         $render->template_dir = core::getConfig('template_dir');
         $render->compile_dir = core::getConfig('compile_dir');
@@ -164,6 +158,28 @@ class core{
      */
     public static function getRouter(){
         return self::$router;
+    }
+
+
+    /**
+     * 获取控制器
+     * 
+     * @return array
+     */
+    public static function getController($controllerName = ''){
+        $controllerName .= 'Controller';
+        return self::instance($controllerName);
+    }
+
+
+    /**
+     * 获取模型
+     * 
+     * @return array
+     */
+    public static function getModel($modelName = ''){
+        $modelName .= 'Model';
+        return self::instance($modelName);
     }
 
 

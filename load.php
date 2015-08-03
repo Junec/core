@@ -12,22 +12,60 @@ class core_load{
      * 
      * @return void
      */
-    public static function autoLoad($className){
-        $params = explode('_',$className);
-        $oriParams = $params;
-        $type = array_shift($params);
-        $path = join('/',$params).'.php';
-        
-        if($type == 'core'){
-            $file = CORE_DIR.'/'.$path;
-        }elseif($type == 'ctl'){
-            $file = core::getConfig('controller_dir').'/'.$path;
-        }elseif($type == 'mdl'){
-            $file = core::getConfig('model_dir').'/'.$path;
-        }elseif($type == 'lib'){
-            $file = core::getConfig('lib_dir').'/'.$path;
+    public static function autoLoad($class){
+        self::loadFile( self::getPath($class) );
+    }
+
+    public static function getPath($class){
+        $path = '';
+        if(empty($class)) return false;
+        $classLen = strlen($class);
+
+        if(strpos($class,'core_') === 0){
+            $classType = 'core';
+            $class = substr($class, 5);
+
+        }elseif(substr($class, $classLen - 10) == 'Controller'){
+            $classType = 'controller';
+            $class = substr($class, 0, $classLen - 10);
+
+        }elseif(substr($class, $classLen - 5) == 'Model'){
+            $classType = 'model';
+            $class = substr($class, 0, $classLen - 5);
+
+        }else{
+            $classType = 'lib';
+
         }
-        if( file_exists($file) ) include_once $file;
+
+        $params = explode('_',$class);
+        $path = join('/',$params);
+        
+        switch($classType){
+            case 'core':
+                $path = CORE_DIR.'/'.$path.'.php';
+            break;
+            case 'controller':
+                $path = core::getConfig('controller_dir').'/'.$path.'.php';
+            break;
+            case 'model':
+                $path = core::getConfig('model_dir').'/'.$path.'.php';
+            break;
+            default:
+                $path = core::getConfig('lib_dir').'/'.$path.'.php';
+            break;
+        }
+
+        return $path;
+    }
+
+
+    public static function loadFile($file){
+        if( file_exists($file) ){
+            return include_once $file;
+        }else{
+            return false;
+        }
     }
 
 }

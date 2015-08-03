@@ -30,12 +30,7 @@ abstract class core_controller{
      * @return void
      */
     public function exec($action = ''){
-        if(method_exists($this,$action)){
-            $this->$action();
-        }else{
-            //404
-            core_handler::notfound();
-        }
+        $this->$action();
     }
 
 
@@ -47,7 +42,7 @@ abstract class core_controller{
      * @return void
      */
     protected function assign($var = '',$val = ''){
-    	return $this->render->assign($var,$val);
+    	#return $this->render->assign($var,$val);
     }
 
 

@@ -26,7 +26,7 @@ class core_handler{
      * 
      * @return void
      */
-    public static function exception(Exception $e){
+    public static function exception($e){
         $errorMsg = '[Exception] '.$e->getMessage()."\n".$e->getTraceAsString();
         self::errorlog( $errorMsg );
     }

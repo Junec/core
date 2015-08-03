@@ -50,7 +50,6 @@ return array(
     'cache_database_options'        => array(),
 
 #模版引擎
-    'tpl_client'                    => 'template',
     'tpl_left_delim'                => '{#',
     'tpl_right_delim'               => '#}',
 
@@ -65,10 +64,7 @@ return array(
 
 #数据库配置信息
     'db_config' => array(
-		'client' => '',
-        'medoo_config' => array(//medoo配置信息
-            'database_type' => '',
-         ),
+		'type' => '',
 		'server' => '',
 		'username' => '',
 		'password' => '',

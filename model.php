@@ -20,8 +20,9 @@ abstract class core_model{
         if(!$this->dbConfig){
             $this->dbConfig = core::getConfig('db_config');
         }
-        $this->db = core_database_client::factory('mysqli',$this->dbConfig);
-        $this->pri = $this->db->getTablePri($this->table);
+
+        $this->db = core_database_factory::getInstance('pdo',$this->dbConfig);
+        #$this->pri = $this->db->getTablePri($this->table);
     }
 
 
@@ -104,7 +105,7 @@ abstract class core_model{
         $_filter = $this->filter( $filter );
         $filter = (empty($_filter) ? ' 1 ' : $_filter);
         $offset = empty($offset) ? 0: $offset;
-        if( !empty($limit) and $limit != '-1' ) $_limit = $offset.','.$limit;
+        if( !empty($limit) && $limit != '-1' ) $_limit = $offset.','.$limit;
         $result = $this->db->select($this->table,$field,$filter,$orderby,$_limit,$groupby);
         return $result;
     }
