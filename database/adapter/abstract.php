@@ -8,6 +8,20 @@
 abstract class core_database_adapter_abstract{
     public $client;
 
+    public function addslashes($string = ''){
+        if(!get_magic_quotes_gpc()){
+            $string = addslashes($string);
+        }
+        return $string;
+    }
+
+    public function stripslashes($string = ''){
+        if(get_magic_quotes_gpc()){
+            $string = stripslashes($string);
+        }
+        return $string;
+    }
+
     public function begin(){
         $this->exec('START TRANSACTION');
         return true;
