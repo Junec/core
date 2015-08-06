@@ -8,23 +8,6 @@
 abstract class core_database_adapter_abstract{
     public $client;
 
-    public function begin(){
-        $this->exec('START TRANSACTION');
-        return true;
-    }
-
-    public function rollback(){
-        $this->exec('ROLLBACK');
-        $this->exec('END');
-        return true;
-    }
-
-    public function commit(){
-        $this->exec('COMMIT');
-        $this->exec('END');
-        return true;
-    }
-
     public function query($sql = ''){
         return $this->client->query($sql);
     }
@@ -115,6 +98,12 @@ abstract class core_database_adapter_abstract{
         return $where;
     }
 
+    public function begin(){}
+
+    public function rollback(){}
+
+    public function commit(){}
+    
     abstract function insert($table = '',$data = array());
 
     abstract function update($table = '',$data = array(),$filter = array());
