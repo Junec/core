@@ -9,7 +9,7 @@ abstract class core_model{
     public $table = '';
     public $dbConfig = array();
     public $pri;
-    private $db;
+    private $adapter;
 
     /**
 	 * 构造函数
@@ -18,11 +18,11 @@ abstract class core_model{
 	 */
     public function __construct(){
         if(!$this->dbConfig) $this->dbConfig = core::getConfig('db_config');
-        $this->db = core_database_factory::getInstance('pdo',$this->dbConfig);
+        $this->adapter = core_database_factory::getInstance('pdo',$this->dbConfig);
     }
 
-    public function getdb(){
-        return $this->db;
+    public function getAdapter(){
+        return $this->adapter;
     }
 
 
@@ -32,61 +32,8 @@ abstract class core_model{
 	 * @param array or string $filter
 	 * @return string filter
 	 */
-    public function filter( $filter = array(),$tablePrefix = null ){
-        $where = ' 1 ';
-        if( is_array($filter) ){
-            foreach($filter as $field=>$value){
-                $isIn = false;
-                if(is_array($value)){
-                    $value = '\''.join('\',\'',$value).'\'';
-                    $isIn = true;
-                }
-                if( stripos($field,'|') === false){
-                    if($isIn == true)    $field = $field.'|in';
-                    else $field = $field.'|=';
-                }
-                $field = explode('|',$field);
-                if($tablePrefix != null) $fieldName = $tablePrefix.'.'.$field[0];
-                else $fieldName = $field[0];
-
-                $link = $field[1];
-                switch($link){
-                    case '=':
-                        if(is_null($value)) $tsql = ' AND '.$fieldName.' is null';
-                        else $tsql = ' AND '.$fieldName.' '.$link.' \''.$value.'\'';
-                    break;
-                    case '!=':
-                        if(is_null($value)) $tsql = ' AND '.$fieldName.' is not null';
-                        else $tsql = ' AND '.$fieldName.' '.$link.' \''.$value.'\'';
-                    break;
-                    case '<=':
-                    case '>=':
-                    case '<':
-                    case '>':
-                        $tsql = ' AND '.$fieldName.' '.$link.' \''.$value.'\'';
-                    break;
-                    case '%~':
-                        $tsql = ' AND '.$fieldName.' like \'%'.$value.'\'';
-                    break;
-                    case '~%':
-                        $tsql = ' AND '.$fieldName.' like \''.$value.'%\'';
-                    break;
-                    case '%':
-                        $tsql = ' AND '.$fieldName.' like \'%'.$value.'%\'';
-                    break;
-                    case 'in':
-                        $tsql = ' AND '.$fieldName.' in ('.$value.')';
-                    break;
-                    case 'notin':
-                        $tsql = ' AND '.$fieldName.' not in ('.$value.')';
-                    break;
-                }
-                $where .= $tsql;
-            }
-        }elseif(!empty($filter)){
-            $where .= ' AND '.$filter;
-        }
-        return $where;
+    public function filter( $filter = array() ){
+        return $this->getAdapter()->filter($filter);
     }
 
     /**
@@ -101,16 +48,7 @@ abstract class core_model{
 	 * @return mixed
 	 */
     public function getList($filter = '',$field = '*',$offset = 0,$limit = '-1',$orderby = '',$groupby = ''){
-        $field = empty($field)?'*':$field;
-        $where = $this->filter( $filter );
-        $offset = empty($offset) ? 0: $offset;
-        if( !empty($limit) && $limit != '-1' ) $_limit = $offset.','.$limit;
-        $sql = "SELECT {$field} FROM {$this->table} WHERE {$where}";
-        if(!empty($orderby)) $sql .= " ORDER BY {$orderby}";
-        if(!empty($groupby)) $sql .= " GROUP BY {$groupby}";
-        if(!empty($_limit))  $sql .= " LIMIT {$_limit}";
-        $result = $this->db->select($sql);
-        return $result;
+        return $this->getAdapter()->getList($this->table,$filter,$field,$offset,$limit,$orderby,$groupby);
     }
 
 
@@ -121,14 +59,7 @@ abstract class core_model{
      * @return miexd
      */
     public function getOne($filter = '',$field = '*',$orderby='',$groupby = ''){
-        if(is_array($filter) || is_string($filter)){
-            $filter = $filter;
-        }elseif(is_numeric($filter)){
-            $filter = array($this->pri => $filter);
-        }
-        $data = $this->getList($filter,$field,0,1,$orderby,$groupby);
-        if(is_array($data) && isset($data[0])) return $data[0];
-        else return array();
+         return $this->getAdapter()->getOne($this->table,$filter,$field,$orderby,$groupby);
     }
 
 
@@ -140,16 +71,7 @@ abstract class core_model{
 	 * @return mixed
 	 */
     public function save(&$data=array()){
-        if( !$data ) return false;
-        if(isset($data[$this->pri]) && $data[$this->pri]!= ''){
-            $filter = array($this->pri=>$data[$this->pri]);
-            $result = $this->update($data,$filter);
-        }else{
-            if( $result = $this->insert($data) ){
-                $data[$this->pri] = $result;
-            }
-        }
-        return $result;
+        #return $this->getAdapter()->save(&$data);
     }
 
     /**
@@ -159,10 +81,7 @@ abstract class core_model{
      * @return miexd
      */
     public function count($filter = array()){
-        $where = $this->filter($filter);
-        $sql = "SELECT COUNT(*) AS _count FROM {$this->table} WHERE {$where}";
-        $result = $this->getdb()->select($sql);
-        return $result[0]['_count'];
+        return $this->getAdapter()->count($this->table,$filter);
     }
 
     /**
@@ -178,18 +97,10 @@ abstract class core_model{
             $datas = array($datas);
         }
         foreach($datas as $data){
-            $valueSql = $fieldSql = array();
-            foreach($data as $field=>$value){
-                $fieldSql[] =  '`'.trim($field).'`';
-                $valueSql[] =  $value===NULL?'null':"'".$value."'";
-            }
-            $fieldSql = join(',',$fieldSql);
-            $valueSql = join(',',$valueSql);
-            $sql = "INSERT INTO {$this->table}({$fieldSql}) VALUES({$valueSql})";
-            $this->getdb()->exec($sql);
-            $insertId[] = $this->getdb()->getInsertId();
+            $insertId[] = $this->getAdapter()->insert($this->table,$data);
         }
         return count($insertId) > 1 ? $insertId : $insertId[0];
+       
     }
 
     /**
@@ -200,16 +111,7 @@ abstract class core_model{
      * @return miexd
      */
     public function update($data = array(),$filter = array()){
-        $where = $this->filter($filter);
-        if(!$data) return false;
-        $fieldSql = '';
-        foreach($data as $k=>$v){
-            $fieldSql[] = $v==NULL?'`'.$k.'`'.'= null':'`'.$k.'`'.'=\''.$v.'\'';
-        }
-        $fieldSql = join(',',$fieldSql);
-        $sql = "UPDATE {$this->table} SET {$fieldSql} WHERE {$where}";
-        $result = $this->getdb()->exec($sql);
-        return empty($result)? false : $result;
+        return $this->getAdapter()->update($this->table,$data,$filter);
     }
 
     /**
@@ -219,10 +121,7 @@ abstract class core_model{
      * @return miexd
      */
     public function delete($filter = array()){
-        $where = $this->filter($filter);
-        $sql = "DELETE FROM {$this->table} WHERE {$where}";
-        $result = $this->getdb()->exec($sql);
-        return empty($result)? false : $result;
+        return $this->getAdapter()->delete($this->table,$filter);
     }
 
     

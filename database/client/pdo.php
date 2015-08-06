@@ -127,6 +127,9 @@ class core_database_client_pdo{
         return $this->pdo->lastInsertId();
     }
 
+    public function prepare($sql = '', $driver_options = array()){
+        return $this->pdo->prepare($sql,$driver_options);
+    }
 
 
 }
