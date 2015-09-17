@@ -6,11 +6,13 @@
  * @copyright  Copyright (c) 2015.
  */
 abstract class core_model{
+    private $adapter;
+
     public $table = '';
     public $dbConfig = array();
     public $pri;
-    private $adapter;
-
+    public $isCache = false;
+    
     /**
 	 * 构造函数
      *

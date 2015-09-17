@@ -193,7 +193,6 @@ class core_database_adapter_pdo extends core_database_adapter_abstract implement
         $statement = $this->client->prepare($sql);
         $statement->execute($filterValue);
         return $this->fetchAll();
-
     }
 
     
