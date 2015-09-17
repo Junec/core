@@ -12,6 +12,76 @@ class core_database_adapter_pdo extends core_database_adapter_abstract implement
     }
 
 
+    public function filter( $filter = array(), &$filterValue = array() ){
+        $where = ' 1 ';
+        if( is_array($filter) ){
+            foreach($filter as $field=>$value){
+                $isIn = false;
+                if(is_array($value)){
+                    $isIn = true;
+                }
+                if( stripos($field,'|') === false){
+                    if($isIn == true)    $field = $field.'|in';
+                    else $field = $field.'|=';
+                }
+                $field = explode('|',$field);
+                $fieldName = $field[0];
+                $link = $field[1];
+                if($isIn){
+                    foreach($value as $vv){
+                        $filterValue[] = $vv;
+                        $filterSql[] = '?';
+                    }
+                    $filterSql = join(',',$filterSql);
+                }else{
+                    $filterValue[] = $value;
+                    $filterSql = '?';
+                }
+                switch($link){
+                    case '=':
+                        $tsql = ' AND '.$fieldName.' = ?';
+                    break;
+                    case '!=':
+                        $tsql = ' AND '.$fieldName.' != ?';
+                    break;
+                    case '<=':
+                    case '>=':
+                    case '<':
+                    case '>':
+                        $tsql = ' AND '.$fieldName.' '.$link.' ?';
+                    break;
+                    case '%~':
+                        $tsql = ' AND '.$fieldName.' like %?';
+                    break;
+                    case '~%':
+                        $tsql = ' AND '.$fieldName.' like ?%';
+                    break;
+                    case '%':
+                        $tsql = ' AND '.$fieldName.' like %?%';
+                    break;
+                    case 'in':
+                        $tsql = ' AND '.$fieldName.' in ('.$filterSql.')';
+                    break;
+                    case 'notin':
+                        $tsql = ' AND '.$fieldName.' not in ('.$filterSql.')';
+                    break;
+                }
+                $where .= $tsql;
+            }
+        }elseif(!empty($filter)){
+            $where .= ' AND '.$filter;
+        }
+        return $where;
+    }
+
+
+    public function select($sql = '',$filterValue = array()){
+        $statement = $this->client->prepare($sql);
+        $statement->execute($filterValue);
+        return $this->fetchAll();
+    }
+
+
     /**
      * 插入
      *
@@ -48,7 +118,8 @@ class core_database_adapter_pdo extends core_database_adapter_abstract implement
      * @return miexd
      */
     public function update($table = '',$data = array(),$filter = array()){
-        $where = $this->filter($filter);
+        $filterValue = array();
+        $where = $this->filter( $filter ,$filterValue);
         if(!$data) return false;
         $fieldSql = array();
         $valueReal = array();
@@ -56,10 +127,11 @@ class core_database_adapter_pdo extends core_database_adapter_abstract implement
             $fieldSql[] = "`{$k}` = ?";
             $valueReal[] = $v === NULL ? 'null' : $v;
         }
+        $paramsValue = array_merge($valueReal,$filterValue);
         $fieldSql = join(',',$fieldSql);
         $sql = "UPDATE {$table} SET {$fieldSql} WHERE {$where}";
         $statement = $this->client->prepare($sql);
-        return $statement->execute($valueReal);
+        return $statement->execute($paramsValue);
     }
 
 
@@ -70,10 +142,12 @@ class core_database_adapter_pdo extends core_database_adapter_abstract implement
      * @return miexd
      */
     public function delete($table = '',$filter = array()){
-        $where = $this->filter($filter);
+        $filterValue = array();
+        $where = $this->filter( $filter ,$filterValue);
         $sql = "DELETE FROM {$table} WHERE {$where}";
         $result = $this->client->exec($sql);
-        return empty($result)? false : $result;
+        $statement = $this->client->prepare($sql);
+        return $statement->execute($filterValue);
     }
 
 
@@ -84,10 +158,13 @@ class core_database_adapter_pdo extends core_database_adapter_abstract implement
      * @return miexd
      */
     public function count($table = '',$filter = array()){
-        $where = $this->filter($filter);
+        $filterValue = array();
+        $where = $this->filter( $filter ,$filterValue);
         $sql = "SELECT COUNT(*) AS _count FROM {$table} WHERE {$where}";
-        $result = $this->select($sql);
-        return $result[0]['_count'];
+        $statement = $this->client->prepare($sql);
+        $statement->execute($filterValue);
+        $result = $this->fetch();
+        return $result['_count'];
     }
 
 
@@ -104,16 +181,19 @@ class core_database_adapter_pdo extends core_database_adapter_abstract implement
      */
     public function getList($table = '',$filter = '',$field = '*',$offset = 0,$limit = '-1',$orderby = '',$groupby = ''){
         $field = empty($field)?'*':$field;
-        $where = $this->filter( $filter );
+        $filterValue = array();
+        $where = $this->filter( $filter ,$filterValue);
         $offset = empty($offset) ? 0: $offset;
         if( !empty($limit) && $limit != '-1' ) $_limit = $offset.','.$limit;
         $sql = "SELECT {$field} FROM {$table} WHERE {$where}";
+
         if(!empty($orderby)) $sql .= " ORDER BY {$orderby}";
         if(!empty($groupby)) $sql .= " GROUP BY {$groupby}";
         if(!empty($_limit))  $sql .= " LIMIT {$_limit}";
+        $statement = $this->client->prepare($sql);
+        $statement->execute($filterValue);
+        return $this->fetchAll();
 
-        $result = $this->select($sql);
-        return $result;
     }
 
     
@@ -133,7 +213,6 @@ class core_database_adapter_pdo extends core_database_adapter_abstract implement
         if(is_array($data) && isset($data[0])) return $data[0];
         else return array();
     }
-
 }
 
 ?>

@@ -25,17 +25,6 @@ abstract class core_model{
         return $this->adapter;
     }
 
-
-    /**
-	 * 解析filter
-	 * 
-	 * @param array or string $filter
-	 * @return string filter
-	 */
-    public function filter( $filter = array() ){
-        return $this->getAdapter()->filter($filter);
-    }
-
     /**
 	 * 查询列表数据
 	 * 
@@ -64,15 +53,36 @@ abstract class core_model{
 
 
     /**
-	 * 保存数据
-	 * 
+     * 保存数据
+     * 
      * 判断传入标准结构内是否含有主键，如有主键则update，无主键则insert。
-     * @param array $data     标准结构
-	 * @return mixed
-	 */
-    public function save(&$data=array()){
-        #return $this->getAdapter()->save(&$data);
+     * @param array $data 标准结构
+     * @return mixed
+     */
+    public function save(&$data = array()){
+        $result = true;
+        $pri_id = $data[$this->pri];
+        if(isset($data[$this->pri]) && $data[$this->pri]!= ''){
+            $filter = array($this->pri=>$pri_id);
+            $oldData = $this->getOne($filter,$this->pri);
+            if( isset($oldData[$this->pri]) && $oldData[$this->pri]!='' ){
+                if( $this->update($data,$filter) ) $result = true;
+                else $result = false;
+            }else{
+                if( $this->insert($data) === false ) $result = false;
+                else $result = true;
+            }
+        }else{
+            if( $insertId = $this->insert($data) ){
+                $data[$this->pri] = $insertId;
+                $result = true;
+            }else{
+                $result = false;
+            }
+        }
+        return $result;
     }
+
 
     /**
      * 统计
@@ -84,24 +94,18 @@ abstract class core_model{
         return $this->getAdapter()->count($this->table,$filter);
     }
 
+
     /**
      * 插入
      *
-     * @param array $datas 数据(支持批量插入)
+     * @param array $data 数据
      * @return miexd
      */
-    public function insert($datas = array()){
-        if( !$datas ) return false;
-        $insertId = array();
-        if( !isset($datas[0]) ){
-            $datas = array($datas);
-        }
-        foreach($datas as $data){
-            $insertId[] = $this->getAdapter()->insert($this->table,$data);
-        }
-        return count($insertId) > 1 ? $insertId : $insertId[0];
+    public function insert($data = array()){
+        return $this->getAdapter()->insert($this->table,$data);
        
     }
+
 
     /**
      * 更新
@@ -113,6 +117,7 @@ abstract class core_model{
     public function update($data = array(),$filter = array()){
         return $this->getAdapter()->update($this->table,$data,$filter);
     }
+
 
     /**
      * 删除

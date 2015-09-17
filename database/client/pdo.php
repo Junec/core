@@ -128,7 +128,9 @@ class core_database_client_pdo{
     }
 
     public function prepare($sql = '', $driver_options = array()){
-        return $this->pdo->prepare($sql,$driver_options);
+        $statement = $this->pdo->prepare($sql,$driver_options);
+        $this->statement = $statement;
+        return $statement;
     }
 
 

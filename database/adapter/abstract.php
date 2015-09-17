@@ -37,66 +37,11 @@ abstract class core_database_adapter_abstract{
         return $this->fetchAll();
     }
 
-
     public function getInsertId(){
         return $this->client->getInsertId();
     }
 
-    public function filter( $filter = array() ){
-        $where = ' 1 ';
-        if( is_array($filter) ){
-            foreach($filter as $field=>$value){
-                $isIn = false;
-                if(is_array($value)){
-                    $value = '\''.join('\',\'',$value).'\'';
-                    $isIn = true;
-                }
-                if( stripos($field,'|') === false){
-                    if($isIn == true)    $field = $field.'|in';
-                    else $field = $field.'|=';
-                }
-                $field = explode('|',$field);
-                $fieldName = $field[0];
-
-                $link = $field[1];
-                switch($link){
-                    case '=':
-                        if(is_null($value)) $tsql = ' AND '.$fieldName.' is null';
-                        else $tsql = ' AND '.$fieldName.' '.$link.' \''.$value.'\'';
-                    break;
-                    case '!=':
-                        if(is_null($value)) $tsql = ' AND '.$fieldName.' is not null';
-                        else $tsql = ' AND '.$fieldName.' '.$link.' \''.$value.'\'';
-                    break;
-                    case '<=':
-                    case '>=':
-                    case '<':
-                    case '>':
-                        $tsql = ' AND '.$fieldName.' '.$link.' \''.$value.'\'';
-                    break;
-                    case '%~':
-                        $tsql = ' AND '.$fieldName.' like \'%'.$value.'\'';
-                    break;
-                    case '~%':
-                        $tsql = ' AND '.$fieldName.' like \''.$value.'%\'';
-                    break;
-                    case '%':
-                        $tsql = ' AND '.$fieldName.' like \'%'.$value.'%\'';
-                    break;
-                    case 'in':
-                        $tsql = ' AND '.$fieldName.' in ('.$value.')';
-                    break;
-                    case 'notin':
-                        $tsql = ' AND '.$fieldName.' not in ('.$value.')';
-                    break;
-                }
-                $where .= $tsql;
-            }
-        }elseif(!empty($filter)){
-            $where .= ' AND '.$filter;
-        }
-        return $where;
-    }
+    public function filter( $filter = array() ){}
 
     public function begin(){}
 
@@ -115,6 +60,4 @@ abstract class core_database_adapter_abstract{
     abstract function getList($table = '',$filter = '',$field = '*',$offset = 0,$limit = '-1',$orderby = '',$groupby = '');
 
     abstract function getOne($table = '',$filter = '',$field = '*',$orderby='',$groupby = '');
-
-
 }
