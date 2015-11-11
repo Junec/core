@@ -9,5 +9,8 @@ abstract class core_widget{
 
 
 
+
+
+
 }
 ?>
