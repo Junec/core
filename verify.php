@@ -7,7 +7,17 @@
  */
 class core_verify{
 
+	public function isMail(){
 
+	}
+
+	public function isMobile(){
+		
+	}
+
+	public function isTel(){
+		
+	}
 
 	
 
