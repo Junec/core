@@ -17,7 +17,7 @@ class core_thread{
      * @var Integer
      */
     private $startTime;
-    
+
 
     /**
      * 析构
@@ -29,16 +29,6 @@ class core_thread{
      * @return void
      */
     public function __construct($script = '',$params = '') {
-        
-        if(defined('PHP_EXEC') && constant('PHP_EXEC')){
-            $executable = PHP_EXEC;
-        }elseif(PHP_OS == 'WINNT'){
-            $executable = dirname(ini_get('extension_dir')).'/php';
-            $executable = file_exists($executable) ? $executable : 'php';
-        }else{
-            $executable = PHP_BINDIR.'/php';
-            $executable = file_exists($executable) ? $executable : 'php';
-        }
 
         $descriptorspec = array(
             0 => array('pipe', 'r'),
@@ -46,7 +36,7 @@ class core_thread{
             2 => array('pipe', 'w')
         );
 
-        $this->resource = proc_open($executable." ".$script." ".$params, $descriptorspec, $this->pipes);
+        $this->resource = proc_open($script." ".$params, $descriptorspec, $this->pipes);
         $this->startTime = time();
     }
 

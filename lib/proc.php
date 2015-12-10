@@ -66,12 +66,12 @@ class core_proc{
             usleep(1000);
 
             //记录进程的关闭状态
-            $thread_close = array();
+            $threadClose = array();
 
             //检查已经完成的任务
             foreach ($this->running as $idx => $thread) {
                 if ( !$thread->isRunning() || $thread->isOverExecuted($this->maxExecTime) ) {
-                    $thread_close[] = proc_close($thread->resource);//记录进程的关闭状态
+                    $threadClose[] = proc_close($thread->resource);//记录进程的关闭状态
                     unset($this->running[$idx]);
                     $this->threadRunning--;
                 }
