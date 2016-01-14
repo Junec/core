@@ -6,10 +6,7 @@
  * @copyright Copyright (c) 2008-2012 Technologies Inc.
  */
 class core_file{
-    
-    const READ_ALL = '0';
-    const READ_FILE = '1';
-    const READ_DIR = '2';
+
 
     /* 以读的方式打开文件 */
     const READ = 'rb';
@@ -29,17 +26,17 @@ class core_file{
      * 获取文件列表
      * 
      * @param string $dir
-     * @param boolean $mode 只读取文件列表,不包含文件夹
+     * @param boolean $mode 0:所有 1:文件 2:目录 
      * @return array
      */
-    public function readList($dir, $mode = self::READ_ALL) {
+    public function readList($dir, $mode = 0) {
         if (!$handle = @opendir($dir)) return array();
         $files = array();
         while (false !== ($file = @readdir($handle))) {
             if ('.' === $file || '..' === $file) continue;
-            if ($mode == self::READ_DIR) {
+            if ($mode == 2) {
                 if ($this->isdir($dir . '/' . $file)) $files[] = $file;
-            } elseif ($mode == self::READ_FILE) {
+            } elseif ($mode == 1) {
                 if ($this->isFile($dir . '/' . $file)) $files[] = $file;
             } else
                 $files[] = $file;
@@ -55,11 +52,10 @@ class core_file{
      * @param string $data 数据
      * @param string $method 读写模式,默认模式为self::WRITE
      * @param bool $ifLock 是否锁文件，默认为true即加锁
-     * @param bool $ifCheckPath 是否检查文件名中的“..”，默认为true即检查
      * @param bool $ifChmod 是否将文件属性改为可读写,默认为true
      * @return int 返回写入的字节数
      */
-    public function write($fileName, $data, $method = self::WRITE, $ifLock = true, $ifCheckPath = true, $ifChmod = true) {
+    public function write($fileName, $data, $method = self::WRITE, $ifLock = true, $ifChmod = true) {
         $dir = dirname($fileName);
         $this->mk($dir);
         if (!$handle = fopen($fileName, $method)) return false;

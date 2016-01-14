@@ -46,6 +46,8 @@ class core_handler{
      * @return void
      */
     public static function errorlog($message){
+        echo $message;
+        return;
         $logfile = core::getConfig('errorlog_dir').'/'.date('Ymd').'.txt';
         $ip = $_SERVER['REMOTE_ADDR'];
         if(core::getConfig('core_debug') === true){

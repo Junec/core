@@ -33,7 +33,6 @@ class core{
 	 * @param string $class    类名
 	 * @return object
 	 */
-    public static function i($class,$param = ''){ return self::instance($class,$param); }
     public static function instance($class,$param = ''){
         if(is_array($param)) $md5par = serialize($param);
         else $md5par = $param;
@@ -76,14 +75,13 @@ class core{
      * @return void
      */
     public static function dispatch(){
-        if(self::isCli() == true) return false;
         $controllerName = self::$boot[ self::getConfig('mvc_controller') ];
         $action = self::$boot[ self::getConfig('mvc_action') ];
-        $controller = self::getController($controllerName);
+        $controller = core::instance($controllerName.'_controller');
         $hashkey = core_debug::info('exec controller: '.$controllerName.'::'.$action.'() , run ...');
         $controller->exec($action);
         core_debug::info('exec controller: '.$controllerName.'::'.$action.'() , end .',$hashkey);
-        if(self::getConfig('core_debug_info') && self::isCli() == false){
+        if(self::getConfig('core_debug') && self::isCli() == false){
             core_debug::output();
         }
     }
@@ -95,7 +93,6 @@ class core{
 	 * @return void
 	 */
     private static function setBoot(){
-        if(self::isCli() == true) return false;
         $pathinfo = self::instance('core_url')->getPathInfo();
         $queryString = self::instance('core_router')->parse($pathinfo);
         $get = self::instance('core_url')->getQueryParams($queryString);
@@ -158,28 +155,6 @@ class core{
      */
     public static function getRouter(){
         return self::$router;
-    }
-
-
-    /**
-     * 获取控制器
-     * 
-     * @return array
-     */
-    public static function getController($controllerName = ''){
-        $controllerName .= 'Controller';
-        return self::instance($controllerName);
-    }
-
-
-    /**
-     * 获取模型
-     * 
-     * @return array
-     */
-    public static function getModel($modelName = ''){
-        $modelName .= 'Model';
-        return self::instance($modelName);
     }
 
 

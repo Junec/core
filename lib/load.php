@@ -25,37 +25,34 @@ class core_load{
             $classType = 'core';
             $class = substr($class, 5);
 
-        }elseif(substr($class, $classLen - 10) == 'Controller'){
+        }elseif(substr($class, $classLen - 11) == '_controller'){
             $classType = 'controller';
-            $class = substr($class, 0, $classLen - 10);
+            $class = substr($class, 0, $classLen - 11);
 
-        }elseif(substr($class, $classLen - 5) == 'Model'){
+        }elseif(substr($class, $classLen - 6) == '_model'){
             $classType = 'model';
-            $class = substr($class, 0, $classLen - 5);
+            $class = substr($class, 0, $classLen - 6);
+
+        }elseif(substr($class, $classLen - 7) == '_widget'){
+            $classType = 'widget';
+            $class = substr($class, 0, $classLen - 7);
+
+        }elseif(substr($class, $classLen - 9) == '_template'){
+            $classType = 'template';
+            $class = substr($class, 0, $classLen - 9);
 
         }else{
             $classType = 'lib';
 
         }
-
-        $params = explode('_',$class);
-        $path = join('/',$params);
         
-        switch($classType){
-            case 'core':
-                $path = CORE_DIR.'/'.$path.'.php';
-            break;
-            case 'controller':
-                $path = core::getConfig('controller_dir').'/'.$path.'.php';
-            break;
-            case 'model':
-                $path = core::getConfig('model_dir').'/'.$path.'.php';
-            break;
-            default:
-                $path = core::getConfig('lib_dir').'/'.$path.'.php';
-            break;
+        $params = explode('_',$class);
+        if($classType == 'core'){
+            $path = CORE_DIR.'/'.join('/',$params).'.php';
+        }else{
+            $app_dir = rtrim(core::getConfig('app_dir'),'/');
+            $path = core::getConfig('app_dir').'/'.$classType.'/'.join('/',$params).'.php';
         }
-
         return $path;
     }
 

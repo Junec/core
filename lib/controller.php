@@ -17,7 +17,6 @@ abstract class core_controller{
      * @return void
      */
     public function __construct(){
-        $this->render = core::render();
         $this->get = $_GET;
         $this->post = $_POST;
         $this->request = $_REQUEST;
@@ -30,7 +29,8 @@ abstract class core_controller{
      * @return void
      */
     public function exec($action = ''){
-        $this->$action();
+        $return = $this->$action();
+
     }
 
 

@@ -100,15 +100,15 @@ class core_debug{
         foreach(self::$sql as $v) $sqlQueryTimes += str_replace('s', '', $v['time']);
         $sqlQueryTimes = self::getFomatTime(0,$sqlQueryTimes);
 
-        $html = "<style>.core-debug-output{ font:12px Tahoma,Consolas;border:1px #ccc solid;margin-top:10px; }.core-debug-output span{display:block;height:20px;line-height:20px;text-align:center;background:#F3F3F3;}.core-debug-output p{margin:0;padding:3px 5px;border-top:1px solid #ddd;}.core-debug-output p font{background:#ddd;}</style>";
+        $html = "<style>.core-debug-output{ font:12px Courier New;margin-top:10px; }.core-debug-output b{color:#2B82C7}.core-debug-output span{display:block;height:20px;line-height:20px;text-align:center;background:#F3F3F3;}.core-debug-output p{margin:0;padding:3px 5px;border-bottom:0px solid #ddd;}.core-debug-output p font{}</style>";
         //Basic
         $html .= "<div class='core-debug-output'><span><b>Basic</b></span>";
-        $html .= "<p><b>RunTime: </b><font>".$endinfo['time']."</font></p>";
-        $html .= "<p><b>Memory: </b><font>".$endinfo['memory']."</font></p>";
-        $html .= "<p><b>SQL: </b><font>QueryTime=".$sqlQueryTimes."</font>　<font>SELECT=".self::getCounter('sql_select')."</font>　<font>INSERT=".self::getCounter('sql_insert')."</font>　<font>UPDATE=".self::getCounter('sql_update')."</font>　<font>DELETE=".self::getCounter('sql_delete')."</font></p>";
-        $html .= "<p><b>Include: </b><font>".count($included)."</font></p>";
-        $html .= "<p><b>Cache: </b><font>SET=".self::getCounter('cache_set')."</font>　<font>GET=".self::getCounter('cache_get')."</font>　<font>DELETE=".self::getCounter('cache_delete')."</font>　<font>FLUSH=".self::getCounter('cache_flush')."</font></p>";
-        $html .= "<p><b>Request: </b><font>GET=".self::getCounter('request_get')."</font>　<font>POST=".self::getCounter('request_post')."</font></p>";
+        $html .= "<p>RunTime: <font>".$endinfo['time']."</font></p>";
+        $html .= "<p>Memory: <font>".$endinfo['memory']."</font></p>";
+        $html .= "<p>SQL: <font>QueryTime=".$sqlQueryTimes." SELECT=".self::getCounter('sql_select')." INSERT=".self::getCounter('sql_insert')." UPDATE=".self::getCounter('sql_update')." DELETE=".self::getCounter('sql_delete')."</font></p>";
+        $html .= "<p>Include: <font>".count($included)."</font></p>";
+        $html .= "<p>Cache: <font>SET=".self::getCounter('cache_set')." GET=".self::getCounter('cache_get')." DELETE=".self::getCounter('cache_delete')." FLUSH=".self::getCounter('cache_flush')."</font></p>";
+        $html .= "<p>Request: <font>GET=".self::getCounter('request_get')." POST=".self::getCounter('request_post')."</font></p>";
         $html .= "</div>";
 
         //Flow
@@ -128,7 +128,7 @@ class core_debug{
         //Include
         $html .= "<div class='core-debug-output'><span><b>Include</b> (".count($included).")</span>";
         foreach($included as $v){
-            $fileinfo = core::i('core_file')->getFileInfo($v);
+            $fileinfo = core::instance('core_file')->getFileInfo($v);
             $html .= '<p>'.$v."　<font>Size: ".self::getSizeUsage($fileinfo['size'])."</font></p>";
         }
         $html .= "</div>";
