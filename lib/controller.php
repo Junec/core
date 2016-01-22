@@ -33,43 +33,6 @@ abstract class core_controller{
 
     }
 
-
-    /**
-     * 模板变量赋值
-     * 
-     * @param string $var 变量名
-     * @param string $val 变量值
-     * @return void
-     */
-    protected function assign($var = '',$val = ''){
-    	#return $this->render->assign($var,$val);
-    }
-
-
-    /**
-     * 模板渲染
-     * 
-     * @param string $template 模板文件
-     * @return htmlcode
-     */
-    protected function fetch($template = ''){
-        $hashkey = core_debug::info('compile template: '.$template.' , ok .');
-        $html = $this->render->fetch($template);
-        core_debug::upTime($hashkey);
-        return $html;
-    }
-
-
-    /**
-     * 模板渲染输出
-     * 
-     * @param string $template 模板文件
-     * @return html
-     */
-    protected function display($template = ''){
-        echo $this->fetch($template);
-    }
-
     /**
      * 页面跳转
      * 

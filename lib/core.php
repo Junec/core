@@ -75,12 +75,13 @@ class core{
      * @return void
      */
     public static function dispatch(){
-        $controllerName = self::$boot[ self::getConfig('mvc_controller') ];
+        $controller = self::$boot[ self::getConfig('mvc_controller') ];
         $action = self::$boot[ self::getConfig('mvc_action') ];
-        $controller = core::instance($controllerName.'_controller');
-        $hashkey = core_debug::info('exec controller: '.$controllerName.'::'.$action.'() , run ...');
-        $controller->exec($action);
-        core_debug::info('exec controller: '.$controllerName.'::'.$action.'() , end .',$hashkey);
+        $controllerClassName = $controller.'_controller';
+        $controllerClass = core::instance($controllerClassName);
+        $hashkey = core_debug::info('exec controller: '.$controllerClassName.'::'.$action.'() , run ...');
+        $controllerClass->exec($action);
+        core_debug::info('exec controller: '.$controllerClassName.'::'.$action.'() , end .',$hashkey);
         if(self::getConfig('core_debug') && self::isCli() == false){
             core_debug::output();
         }

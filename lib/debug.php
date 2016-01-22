@@ -100,7 +100,7 @@ class core_debug{
         foreach(self::$sql as $v) $sqlQueryTimes += str_replace('s', '', $v['time']);
         $sqlQueryTimes = self::getFomatTime(0,$sqlQueryTimes);
 
-        $html = "<style>.core-debug-output{ font:12px Courier New;margin-top:10px; }.core-debug-output b{color:#2B82C7}.core-debug-output span{display:block;height:20px;line-height:20px;text-align:center;background:#F3F3F3;}.core-debug-output p{margin:0;padding:3px 5px;border-bottom:0px solid #ddd;}.core-debug-output p font{}</style>";
+        $html = "<style>.core-debug-output{ font:12px Consolas, Liberation Mono, Menlo, Courier, monospace;margin-top:10px; }.core-debug-output b{color:#2B82C7}.core-debug-output span{display:block;height:20px;line-height:20px;text-align:left;padding-left:5px;background:#F3F3F3;}.core-debug-output p{margin:0;padding:3px 5px;border-bottom:0px solid #ddd;}.core-debug-output p font{}</style>";
         //Basic
         $html .= "<div class='core-debug-output'><span><b>Basic</b></span>";
         $html .= "<p>RunTime: <font>".$endinfo['time']."</font></p>";
@@ -118,13 +118,6 @@ class core_debug{
         }
         $html .= "</div>";
 
-        //Sql
-        $html .= "<div class='core-debug-output'><span><b>SQL</b> (".count(self::$sql).")</span>";
-        foreach(self::$sql as $v){
-            $html .= '<p>'.$v['info']."　<font>QueryTime: ".$v['time']."</font></p>";
-        }
-        $html .= "</div>";
-
         //Include
         $html .= "<div class='core-debug-output'><span><b>Include</b> (".count($included).")</span>";
         foreach($included as $v){
@@ -132,6 +125,14 @@ class core_debug{
             $html .= '<p>'.$v."　<font>Size: ".self::getSizeUsage($fileinfo['size'])."</font></p>";
         }
         $html .= "</div>";
+
+        //Sql
+        $html .= "<div class='core-debug-output'><span><b>SQL</b> (".count(self::$sql).")</span>";
+        foreach(self::$sql as $v){
+            $html .= '<p>'.$v['info']."　<font>QueryTime: ".$v['time']."</font></p>";
+        }
+        $html .= "</div>";
+
         echo $html;
     }
 }
