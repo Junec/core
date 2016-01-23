@@ -76,9 +76,9 @@ class core{
         $action = self::$boot[ self::getConfig('mvc_action') ];
         $controllerClassName = $controller.'_controller';
         $controllerClass = core::instance($controllerClassName);
-        $hashkey = core_debug::info('exec controller: '.$controllerClassName.'::'.$action.'() , run ...');
+        $hashkey = core_debug::info('controller: '.$controllerClassName.'::'.$action.'() , run ...');
         $controllerClass->exec($action);
-        core_debug::info('exec controller: '.$controllerClassName.'::'.$action.'() , end .',$hashkey);
+        core_debug::info('controller: '.$controllerClassName.'::'.$action.'() , end .',$hashkey);
         if(self::getConfig('core_debug') && strpos(PHP_SAPI,'cli') === false){
             core_debug::output();
         }
@@ -103,8 +103,8 @@ class core{
         self::$boot[ self::$config['mvc_controller'] ] = $controller;
         self::$boot[ self::$config['mvc_action'] ] = $action;
         self::$boot['pathinfo'] = $pathinfo;
-        core_debug::info('path_info: '.$pathinfo);
-        core_debug::info('query_string: '.$queryString);
+        core_debug::info('path info: '.$pathinfo);
+        core_debug::info('query string: '.$queryString);
     }
 
 

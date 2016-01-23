@@ -35,7 +35,7 @@ class core_page{
      * @return htmlcode
      */
     public function fetch($template = ''){
-        $hashkey = core_debug::info('compile template: '.$template.' , ok .');
+        $hashkey = core_debug::info('compile template: '.$template);
         $html = $this->getRender()->fetch($template);
         core_debug::upTime($hashkey);
         return $html;
@@ -49,6 +49,7 @@ class core_page{
      * @return html
      */
     public function display($template = ''){
+        echo $template."<br>";
         echo $this->fetch($template);
     }
 

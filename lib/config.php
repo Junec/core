@@ -10,7 +10,6 @@ return array(
 
 #DEBUG模式
     'core_debug'                    => true,
-    'core_debug_info'               => false,
 
 #运行内存设置
     'core_memory_limit'             => '32M',
@@ -61,7 +60,6 @@ return array(
     'template_dir'                  => APP_DIR.'/template',
     'widget_dir'                    => APP_DIR.'/widget',
     'compile_dir'                   => APP_DIR.'/data/compile',
-    'errorlog_dir'                  => APP_DIR.'/data/errorlog',
 
 #数据库配置信息
     'db_config' => array(
