@@ -40,9 +40,6 @@ class core_thread{
      * @return boolean
      */
     public function close(){
-        foreach($this->descriptorspec as $k){
-            fclose($this->descriptorspec[$k]);
-        }
         return proc_close($this->resource);
     }
 

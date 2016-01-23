@@ -1,13 +1,20 @@
 <?php
 class core_crontab{
-
+    protected $crontabsModel;
+    protected $crontabsLogsModel;
     private $threadRunning = 0;
     private $running = array();
     private $sleepTime= 1;
-    
 
-    public function addScript($jobId = '', $script = ''){
+    public function __construct(){
+        $this->crontabsModel = core::instance('crontabs_model');
+        $this->crontabsLogsModel = core::instance('crontabs_logs_model');
+    }
+
+    public function addScript($jobId = '', $script = '', $nextExecTime = 0){
         $this->scripts[$jobId] = $script;
+        $this->scriptsNextExecTime[$jobId] = $nextExecTime;
+        $this->crontabsModel->update(array('status'=>1),array('id'=>$job['id']));
     }
 
     public function exec(){
@@ -38,17 +45,8 @@ class core_crontab{
     }
 
     public function update($jobId, $status = 0, $startTime, $endTime){
-        $pdo = new core_database_client_pdo(array(
-            'server' => 'localhost',
-            'username' => 'root',
-            'password' => '...',
-            'port' => 3306,
-            'database' => 'web',
-            'charset' => 'utf8',
-        ));
-        #$time = (int)strtotime(date('Y-m-d H:i:00',$endTime));
-        $pdo->exec("UPDATE crontabs SET status = 0,time = time+space*60 WHERE id =".$jobId);
-        $pdo->exec("INSERT INTO crontabs_logs(jobId,status,startTime,endTime) VALUES({$jobId},{$status},{$startTime},{$endTime})");
+        $this->crontabsModel->update(array('status'=>0,'time'=>$this->scriptsNextExecTime[$jobId]),array('id'=>$jobId));
+        $this->crontabsLogsModel->insert(array('jobId'=>$jobId,'status'=>$status,'startTime'=>$startTime,'endTime'=>$endTime));
     }
 
 }

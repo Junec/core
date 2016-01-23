@@ -112,7 +112,7 @@ class core_database_client_pdo{
      */
     public function fetch(){
         $result = array();
-        $data = $this->statement->fetch();
+        $data = $this->statement->fetch(PDO::FETCH_ASSOC);
         if($data){
             $result = $data;
             $data = null;
