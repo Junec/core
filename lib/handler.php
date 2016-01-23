@@ -47,15 +47,6 @@ class core_handler{
      */
     public static function errorlog($message){
         echo $message;
-        return;
-        $logfile = core::getConfig('errorlog_dir').'/'.date('Ymd').'.txt';
-        $ip = $_SERVER['REMOTE_ADDR'];
-        if(core::getConfig('core_debug') === true){
-            echo $message;
-        }else{
-            $message = sprintf("#%s# - %s %s\n", date("Y-m-d H:i:s") , $ip , $message);
-            self::instance('core_file')->write($logfile,$message);
-        }
     }
 	
 

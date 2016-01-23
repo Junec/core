@@ -59,6 +59,7 @@ return array(
     'model_dir'                     => APP_DIR.'/model',
     'data_dir'                      => APP_DIR.'/data',
     'template_dir'                  => APP_DIR.'/template',
+    'widget_dir'                    => APP_DIR.'/widget',
     'compile_dir'                   => APP_DIR.'/data/compile',
     'errorlog_dir'                  => APP_DIR.'/data/errorlog',
 

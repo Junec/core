@@ -25,6 +25,9 @@ class core_template{
     /** 模版变量 **/
     public $vars = array();
 
+    /** 编译文件标识 **/
+    public $mark = 'template';
+
     /** 解析标签 **/
     private $parseTags = array(
         'php',
@@ -40,7 +43,7 @@ class core_template{
     );
 
     //tudo: 未实现
-    private $regFunctions = array();
+    public $regFunctions = array();
 
 
     /**
@@ -61,7 +64,7 @@ class core_template{
      * @return string
      */
     protected function getCompilePath($tpl = ''){
-        $compileFile = str_replace(array('/','.'),'_',$tpl).'_complie.php';
+        $compileFile = str_replace(array('/','.'),'_',$tpl).'_'.$this->mark.'_complie.php';
         return $this->compile_dir.DIRECTORY_SEPARATOR.$compileFile;
     }
 
@@ -329,4 +332,5 @@ class core_template{
 
         return $parseStr;
     }
+
 }

@@ -34,6 +34,49 @@ abstract class core_controller{
     }
 
     /**
+     * 模版对象
+     * 
+     * @return object
+     */
+    protected function getRender(){
+        return core::instance('core_page')->getRender();
+    }
+
+    /**
+     * 模板变量赋值
+     * 
+     * @param string $var 变量名
+     * @param string $val 变量值
+     * @return void
+     */
+    protected function assign($var = '',$val = ''){
+    	return core::instance('core_page')->assign($var,$val);
+    }
+
+
+    /**
+     * 模板渲染
+     * 
+     * @param string $template 模板文件
+     * @return htmlcode
+     */
+    protected function fetch($template = ''){
+        return core::instance('core_page')->fetch($template);
+    }
+
+
+    /**
+     * 模板渲染输出
+     * 
+     * @param string $template 模板文件
+     * @return html
+     */
+    protected function display($template = ''){
+        return core::instance('core_page')->display($template);
+    }
+
+
+    /**
      * 页面跳转
      * 
      * @param string $url 跳转地址 为空则后退

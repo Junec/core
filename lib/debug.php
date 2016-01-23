@@ -48,7 +48,7 @@ class core_debug{
             'memory' => self::getSizeUsage(memory_get_usage()),
         );
 
-        if( core::isCli() == true ){
+        if( strpos(PHP_SAPI,'cli') === true ){
             if(core::getConfig('core_debug') == true) echo $debugInfo['info'].' (Time: '.$debugInfo['time'].' , Memory: '.$debugInfo['memory'].")\n";
         }else{
             if($type == 'info'){
@@ -67,7 +67,7 @@ class core_debug{
         $time = self::getTime();
         $execTime = self::getFomatTime(self::$hashkeyTimeline[$hashkey],$time);
         unset(self::$hashkeyTimeline[$hashkey]);
-        if( core::isCli() == false ){
+        if( strpos(PHP_SAPI,'cli') === false ){
             if($type == 'info'){
                 self::$info[$hashkey]['time'] = $execTime;
             }elseif($type == 'sql'){
@@ -100,7 +100,7 @@ class core_debug{
         foreach(self::$sql as $v) $sqlQueryTimes += str_replace('s', '', $v['time']);
         $sqlQueryTimes = self::getFomatTime(0,$sqlQueryTimes);
 
-        $html = "<style>.core-debug-output{ font:12px Consolas, Liberation Mono, Menlo, Courier, monospace;margin-top:10px; }.core-debug-output b{color:#2B82C7}.core-debug-output span{display:block;height:20px;line-height:20px;text-align:left;padding-left:5px;background:#F3F3F3;}.core-debug-output p{margin:0;padding:3px 5px;border-bottom:0px solid #ddd;}.core-debug-output p font{}</style>";
+        $html = "<style>.core-debug-output{ font:12px Consolas,Courier;margin-top:10px; color:#333;}.core-debug-output b{color:#2B82C7}.core-debug-output span{display:block;height:20px;line-height:20px;text-align:left;padding-left:5px;background:#F3F3F3;}.core-debug-output p{margin:0;padding:3px 5px;border-bottom:0px solid #ddd;}.core-debug-output p font{}</style>";
         //Basic
         $html .= "<div class='core-debug-output'><span><b>Basic</b></span>";
         $html .= "<p>RunTime: <font>".$endinfo['time']."</font></p>";

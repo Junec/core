@@ -13,11 +13,7 @@ class core_api extends core_controller{
      * @return void
      */
     public function __construct(){
-        parent::__construct();
-        $apiKey = $this->get['apiKey'];
-        if(md5($apiKey) !== md5(core::getConfig('api_key'))){
-            $this->result('fail','permission error.');
-        }
+        
     }
 
 }

@@ -7,7 +7,6 @@
 */
 
 define('CORE_VERSION', '5.0');
-define('CORE_SAPI', PHP_SAPI);
 define('CORE_DIR',realpath(dirname(__FILE__)));
 header("Content-type:text/html;charset=utf-8");
 if(extension_loaded('zlib')) {
@@ -58,12 +57,10 @@ class core{
         self::$config = array_merge($coreConfig,$config);
         self::$router = self::$config['router_rules'];
 
-        /* settings memory */
+        /* settings */
         ini_set('memory_limit',self::$config['core_memory_limit']);
-        error_reporting(0);
-        ini_set('display_errors','Off');
+        error_reporting( E_ALL^E_NOTICE );
         date_default_timezone_set(self::$config['core_timezone']);
-        register_shutdown_function(array('core_handler','error'));
         set_exception_handler(array('core_handler','exception'));
         self::setBoot();
     }
@@ -82,7 +79,7 @@ class core{
         $hashkey = core_debug::info('exec controller: '.$controllerClassName.'::'.$action.'() , run ...');
         $controllerClass->exec($action);
         core_debug::info('exec controller: '.$controllerClassName.'::'.$action.'() , end .',$hashkey);
-        if(self::getConfig('core_debug') && self::isCli() == false){
+        if(self::getConfig('core_debug') && strpos(PHP_SAPI,'cli') === false){
             core_debug::output();
         }
     }
@@ -106,24 +103,8 @@ class core{
         self::$boot[ self::$config['mvc_controller'] ] = $controller;
         self::$boot[ self::$config['mvc_action'] ] = $action;
         self::$boot['pathinfo'] = $pathinfo;
-        core_debug::info('pathinfo: '.$pathinfo);
-        core_debug::info('queryString: '.$queryString);
-    }
-
-
-    /**
-     * 模版对象
-     * 
-     * @param 
-     * @return object
-     */
-    public static function render(){
-        $render = core::instance('core_template');
-        $render->template_dir = core::getConfig('template_dir');
-        $render->compile_dir = core::getConfig('compile_dir');
-        $render->tpl_left_delim = core::getConfig('tpl_left_delim');
-        $render->tpl_right_delim = core::getConfig('tpl_right_delim');
-        return $render;
+        core_debug::info('path_info: '.$pathinfo);
+        core_debug::info('query_string: '.$queryString);
     }
 
 
@@ -158,21 +139,6 @@ class core{
         return self::$router;
     }
 
-
-    /**
-     * 运行模式
-     * CGI || CLI
-     * 
-     * @return array
-     */
-    public static function isCli(){
-        if(strpos(CORE_SAPI,'cli') === false){
-            $result = false;
-        }else{
-            $result = true;
-        }
-        return $result;
-    }
 
 }
 ?>
