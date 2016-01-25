@@ -53,10 +53,7 @@ class core_debug{
         }else{
             if($type == 'info'){
                 self::$info[$newHashkey] = $debugInfo;
-            }elseif($type == 'sql'){
-                self::$sql[$newHashkey] = $debugInfo;
             }
-            
         }
         return $newHashkey;
     }
@@ -100,38 +97,48 @@ class core_debug{
         foreach(self::$sql as $v) $sqlQueryTimes += str_replace('s', '', $v['time']);
         $sqlQueryTimes = self::getFomatTime(0,$sqlQueryTimes);
 
-        $html = "<style>.core-debug-output{ font:12px Consolas,Courier;margin-top:10px; color:#333;}.core-debug-output b{color:#2B82C7}.core-debug-output span{display:block;height:20px;line-height:20px;text-align:left;padding-left:5px;background:#F3F3F3;}.core-debug-output p{margin:0;padding:3px 5px;border-bottom:0px solid #ddd;}.core-debug-output p font{}</style>";
+        $html = "<style>.core-debug-output{ font:12px Consolas,Courier;color:#333;}.core-debug-output b{color:#2B82C7}.core-debug-output span{display:block;height:20px;line-height:20px;text-align:left;padding-left:5px;background:#F3F3F3;}.core-debug-output p{margin:0;padding:3px 5px;border-bottom:0px solid #ddd;}.core-debug-output p font{}.core-debug-table{font-size:12px;}.core-debug-table tr td{background:#F4F4F4;}</style>";
         //Basic
         $html .= "<div class='core-debug-output'><span><b>Basic</b></span>";
-        $html .= "<p>RunTime: <font>".$endinfo['time']."</font></p>";
-        $html .= "<p>Memory: <font>".$endinfo['memory']."</font></p>";
-        $html .= "<p>SQL: <font>QueryTime=".$sqlQueryTimes." SELECT=".self::getCounter('sql_select')." INSERT=".self::getCounter('sql_insert')." UPDATE=".self::getCounter('sql_update')." DELETE=".self::getCounter('sql_delete')."</font></p>";
-        $html .= "<p>Include: <font>".count($included)."</font></p>";
-        $html .= "<p>Cache: <font>SET=".self::getCounter('cache_set')." GET=".self::getCounter('cache_get')." DELETE=".self::getCounter('cache_delete')." FLUSH=".self::getCounter('cache_flush')."</font></p>";
-        $html .= "<p>Request: <font>GET=".self::getCounter('request_get')." POST=".self::getCounter('request_post')."</font></p>";
+        $html .= "<table class='core-debug-table'>
+            <tr>
+                <td>RunTime</td>
+                <td>".$endinfo['time']."</td>
+            </tr>
+            <tr>
+                <td>Memory</td>
+                <td>".$endinfo['memory']."</td>
+            </tr>
+            <tr>
+                <td>Include</td>
+                <td>".count($included)."</td>
+            </tr>
+            <tr>
+                <td>Cache</td>
+                <td>SET=".self::getCounter('cache_set')." GET=".self::getCounter('cache_get')." DELETE=".self::getCounter('cache_delete')." FLUSH=".self::getCounter('cache_flush')."</td>
+            </tr>
+        </table>";
         $html .= "</div>";
 
         //Flow
-        $html .= "<div class='core-debug-output'><span><b>Flow</b>  (".count(self::$info).")</span>";
+        $html .= "<div class='core-debug-output'><span><b>Flow</b>  (".count(self::$info).")</span><table class='core-debug-table'><tr><td width=15%>*Time</td><td width=15%>*Memory</td><td>*Info</td></tr>";
         foreach(self::$info as $v){
-            $html .= '<p>'.$v['info']."　<font>Time: ".$v['time']."</font>　<font>Memory: ".$v['memory']."</font></p>";
+            $html .= "<tr>
+            <td>".$v['time']."</td>
+            <td>".$v['memory']."</td>
+            <td>".$v['info']."</td></tr>";
         }
-        $html .= "</div>";
+        $html .= "</table></div>";
 
         //Include
-        $html .= "<div class='core-debug-output'><span><b>Include</b> (".count($included).")</span>";
+        $html .= "<div class='core-debug-output'><span><b>Include</b> (".count($included).")</span><table class='core-debug-table'><tr><td width=15%>*Size</td><td>*File</td></tr>";
         foreach($included as $v){
             $fileinfo = core::instance('core_file')->getFileInfo($v);
-            $html .= '<p>'.$v."　<font>Size: ".self::getSizeUsage($fileinfo['size'])."</font></p>";
+            $html .= "<tr>
+            <td>".self::getSizeUsage($fileinfo['size'])."</td>
+            <td>".$v."</td></tr>";
         }
-        $html .= "</div>";
-
-        //Sql
-        $html .= "<div class='core-debug-output'><span><b>SQL</b> (".count(self::$sql).")</span>";
-        foreach(self::$sql as $v){
-            $html .= '<p>'.$v['info']."　<font>QueryTime: ".$v['time']."</font></p>";
-        }
-        $html .= "</div>";
+        $html .= "</table></div>";
 
         echo $html;
     }

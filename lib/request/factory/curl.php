@@ -21,7 +21,6 @@ class core_request_factory_curl extends core_request_abstract implements core_re
 	 * @return void
 	 */
 	public function get($url = '',$params = array()){
-		core_debug::setCounter('request_get');
 		return $this->_request($url,'GET',$params);
 	}
 
@@ -33,7 +32,6 @@ class core_request_factory_curl extends core_request_abstract implements core_re
 	 * @return void
 	 */
 	public function post($url = '',$params = array()){
-		core_debug::setCounter('request_post');
         return $this->_request($url,'POST',$params);
 	}
 

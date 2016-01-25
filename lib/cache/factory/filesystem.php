@@ -15,9 +15,14 @@ class core_cache_factory_filesystem extends core_cache_abstract implements core_
     }
 
     public function __construct($params = array()){
-        $this->savepath = $params['cache_dir'];
-        core_debug::info('set filesystem dir: '.$this->getSavePath());
         $this->obj = core::instance('core_file');
+        if(!isset($params['cache_dir']) || !$this->obj->isDir($params['cache_dir'])){
+            $this->savepath = core::getConfig('cache_filesystem_dir');
+        }else{
+            $this->savepath = $params['cache_dir'];
+        }
+        core_debug::info('set filesystem dir: '.$this->getSavePath());
+        
     }
 
     /**
@@ -40,7 +45,6 @@ class core_cache_factory_filesystem extends core_cache_abstract implements core_
 
         $value = '<?php exit; ?>'.$array;
         $file = $this->getSavePath().$key.'.php';
-
         if( $this->obj->isDir($this->getSavePath()) || $this->obj->mk($this->getSavePath()) ){
             $result = $this->obj->write($file,$value);
             if( $result ) return true;

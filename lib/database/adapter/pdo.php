@@ -74,6 +74,11 @@ class core_database_adapter_pdo extends core_database_adapter_abstract implement
         return $where;
     }
 
+    public function prepareExecute($sql = '',$value = array()){
+        $statement = $this->client->prepare($sql);
+        return $statement->execute($value);
+    }
+
     public function select($sql = '',$filterValue = array()){
         $statement = $this->client->prepare($sql);
         $statement->execute($filterValue);
@@ -101,8 +106,7 @@ class core_database_adapter_pdo extends core_database_adapter_abstract implement
         $fieldSql = join(',',$fieldSql);
         $valuePrepareSql = join(',',$valuePrepareSql);
         $sql = "INSERT INTO {$table}({$fieldSql}) VALUES({$valuePrepareSql})";
-        $statement = $this->client->prepare($sql);
-        $result = $statement->execute($valueReal);
+        $result = $this->prepareExecute($sql,$valueReal);
         $insertId = $this->client->getInsertId();
         return $insertId;
     }
@@ -129,8 +133,7 @@ class core_database_adapter_pdo extends core_database_adapter_abstract implement
         $paramsValue = array_merge($valueReal,$filterValue);
         $fieldSql = join(',',$fieldSql);
         $sql = "UPDATE {$table} SET {$fieldSql} WHERE {$where}";
-        $statement = $this->client->prepare($sql);
-        return $statement->execute($paramsValue);
+        return $this->prepareExecute($sql,$paramsValue);
     }
 
 
@@ -144,9 +147,7 @@ class core_database_adapter_pdo extends core_database_adapter_abstract implement
         $filterValue = array();
         $where = $this->prepareFilter( $filter ,$filterValue);
         $sql = "DELETE FROM {$table} WHERE {$where}";
-        $result = $this->client->exec($sql);
-        $statement = $this->client->prepare($sql);
-        return $statement->execute($filterValue);
+        return $this->prepareExecute($sql,$filterValue);
     }
 
 
@@ -160,8 +161,7 @@ class core_database_adapter_pdo extends core_database_adapter_abstract implement
         $filterValue = array();
         $where = $this->prepareFilter( $filter ,$filterValue);
         $sql = "SELECT COUNT(*) AS _count FROM {$table} WHERE {$where}";
-        $statement = $this->client->prepare($sql);
-        $statement->execute($filterValue);
+        $this->prepareExecute($sql,$filterValue);
         $result = $this->fetch();
         return $result['_count'];
     }
@@ -189,8 +189,7 @@ class core_database_adapter_pdo extends core_database_adapter_abstract implement
         if(!empty($orderby)) $sql .= " ORDER BY {$orderby}";
         if(!empty($groupby)) $sql .= " GROUP BY {$groupby}";
         if(!empty($_limit))  $sql .= " LIMIT {$_limit}";
-        $statement = $this->client->prepare($sql);
-        $statement->execute($filterValue);
+        $this->prepareExecute($sql,$filterValue);
         return $this->fetchAll();
     }
 
