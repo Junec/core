@@ -49,7 +49,6 @@ class core_page{
      * @return html
      */
     public function display($template = ''){
-        echo $template."<br>";
         echo $this->fetch($template);
     }
 

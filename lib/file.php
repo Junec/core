@@ -63,7 +63,7 @@ class core_file{
         $writeCheck = fwrite($handle, $data);
         $method == self::READWRITE && ftruncate($handle, strlen($data));
         fclose($handle);
-        $ifChmod && chmod($fileName, 0777);
+        $ifChmod && @chmod($fileName, 0777);
         return $writeCheck;
     }
 
