@@ -45,13 +45,12 @@ class core_load{
             $classType = 'lib';
 
         }
-        
         $params = explode('_',$class);
         if($classType == 'core'){
             $path = CORE_DIR.'/'.join('/',$params).'.php';
         }else{
-            $app_dir = rtrim(core::getConfig('app_dir'),'/');
-            $path = core::getConfig('app_dir').'/'.$classType.'/'.join('/',$params).'.php';
+            $app_dir = rtrim(APP_DIR,'/');
+            $path = $app_dir.'/'.$classType.'/'.join('/',$params).'.php';
         }
         return $path;
     }
