@@ -20,30 +20,23 @@ class core_load{
         $path = '';
         if(empty($class)) return false;
         $classLen = strlen($class);
-
         if(strpos($class,'core_') === 0){
             $classType = 'core';
             $class = substr($class, 5);
-
         }elseif(substr($class, $classLen - 11) == '_controller'){
             $classType = 'controller';
             $class = substr($class, 0, $classLen - 11);
-
         }elseif(substr($class, $classLen - 6) == '_model'){
             $classType = 'model';
             $class = substr($class, 0, $classLen - 6);
-
         }elseif(substr($class, $classLen - 7) == '_widget'){
             $classType = 'widget';
             $class = substr($class, 0, $classLen - 7);
-
         }elseif(substr($class, $classLen - 9) == '_template'){
             $classType = 'template';
             $class = substr($class, 0, $classLen - 9);
-
         }else{
             $classType = 'lib';
-
         }
         $params = explode('_',$class);
         if($classType == 'core'){

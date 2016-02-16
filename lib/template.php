@@ -114,6 +114,7 @@ class core_template{
         $this->regFunctions[$tplFunction] = $function;
     }
 
+
     /**
      * 模板变量赋值
      * 
@@ -128,6 +129,7 @@ class core_template{
             $this->vars[$var] = $val;
         }
     }
+
 
     /**
      * 模板渲染
@@ -146,6 +148,7 @@ class core_template{
         return $fetch;
     }
 
+
     /**
      * 模板渲染输出
      * 
@@ -156,6 +159,7 @@ class core_template{
         echo $this->fetch($tpl);
     }
 
+
     /**
      * 解析编译文件变量
      * 
@@ -165,80 +169,11 @@ class core_template{
     private function parseVar(&$compile = ''){
         preg_match_all("/{$this->left_delim}([$].+?){$this->right_delim}/",$compile,$vars);
         foreach($vars[0] as $k=>$v){
-            $isModify = strstr($v, '|');
-            if( $isModify === false ){//常规变量   
-                $compile = str_replace($v,'<?php echo '.$vars[1][$k].';?>',$compile);
-            }else{//带修饰器
-                $parseVarModifyParams = array();
-                $varModifyArray = explode('|',$vars[1][$k]);
-                $varOri = array_shift($varModifyArray);
-                $varModify = join('|',$varModifyArray);
-                foreach( $varModifyArray as $vmk => $vmv){
-                    $isModifyParams = strpos($vmv, ':');
-                    if( $isModifyParams === false ){
-                        $parseVarModifyParams[] = array('modify'=>$vmv);
-                    }else{
-                        $modify = substr($vmv,0,$isModifyParams);
-                        $modifyParams = substr($vmv,$isModifyParams+1);
-                        $modifyParams = explode(':',$modifyParams);
-                        $parseVarModifyParams[] = array('modify'=>$modify,'params'=>$modifyParams);
-                    }
-                }
-                $compile = str_replace($v,'<?php $this->varModify('.$varOri.','.$this->varExport($parseVarModifyParams).');?>',$compile);
-                unset($varModifyArray);
-            }
+            $compile = str_replace($v,'<?='.$vars[1][$k].';?>',$compile);
         }
         return $compile; 
     }
 
-    private function varModify($var = '',$params = array()){
-        $echo = $var;
-        foreach($params as $v){
-            $mp = $v['params'];
-            switch($v['modify']){
-                case 'default':
-                    $echo = $echo == '' ? $mp[0] : $echo;
-                break;
-                case 'truncate':
-                    if ($mp[0] == 0){
-                        $echo = '';
-                    }else{
-                        $pa = "/[\x01-\x7f]|[\xc2-\xdf][\x80-\xbf]|\xe0[\xa0-\xbf]"."[\x80-\xbf]|[\xe1-\xef][\x80-\xbf][\x80-\xbf]"."|\xf0[\x90-\xbf][\x80-\xbf][\x80-\xbf]|[\xf1-\xf7]"."[\x80-\xbf][\x80-\xbf][\x80-\xbf]/";
-                        preg_match_all($pa,$echo,$tString);
-                        $echo = join('',array_slice($tString[0],0,$mp[0]));
-                        if (count($tString[0])>$mp[0]) $echo .= $mp[1];
-                    }
-                break;
-                case 'date':
-                    $echo = date($mp[0],$echo);
-                break;
-                case 'strip_tags':
-                    $echo = strip_tags($echo,$mp[0]);
-                break;
-            }
-        }
-        echo $echo;
-        unset($echo);
-    }
-
-
-    private function varExport($var,$mk = ''){
-        if (is_array($var)){
-            $code = 'array(';
-            foreach ($var as $key => $value) {
-               $code .= "'$key'=>".$this->varExport($value,$key).',';
-            }
-            $code = chop($code, ','); //remove unnecessary coma
-            $code .= ')';
-                return $code;
-        }else{
-            if($mk === 'modify'){
-                return "'".$var."'";
-            }else{
-                return $var;
-            }
-        }
-    }
 
     /**
      * 解析编译文件全局标签
@@ -252,6 +187,7 @@ class core_template{
             $compile = preg_replace($regxp,"\$this->parseTagAll('$tag','\\1')",$compile);
         }
     }
+
 
     /**
      * 解析编译文件标签代码
