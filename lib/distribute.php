@@ -1,4 +1,10 @@
 <?php
+/**
+ * 分布式缓存基类
+ * 
+ * @author June Chen <594553417@qq.com>
+ * @copyright  Copyright (c) 2016.
+ */
 class distribute{
 
 	//节点
@@ -60,7 +66,7 @@ class distribute{
 
 	/**
 	 * 二分法查找环内最近节点
-     *
+	 *
 	 * @param $hash 
 	 * @param $low 
 	 * @param $high 
