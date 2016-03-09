@@ -9,8 +9,8 @@ class distribute{
 
 	/**
 	 * 初始化服务器节点
-     *
-     * @param $servers 服务器信息
+	 *
+	 * @param $servers 服务器信息
 	 * @return void
 	 */
 	public function init($servers = array()){
@@ -29,8 +29,8 @@ class distribute{
 
 	/**
 	 * 获取节点
-     *
-     * @param $key 
+	 *
+	 * @param $key 
 	 * @return string
 	 */
 	public function getServer($key = ''){
@@ -43,8 +43,8 @@ class distribute{
 
 	/**
 	 * 一致性Hash
-     *
-     * @param $key 
+	 *
+	 * @param $key 
 	 * @return hash
 	 */
 	private function hashkey($key = ''){
@@ -61,9 +61,9 @@ class distribute{
 	/**
 	 * 二分法查找环内最近节点
      *
-     * @param $hash 
-     * @param $low 
-     * @param $high 
+	 * @param $hash 
+	 * @param $low 
+	 * @param $high 
 	 * @return hash
 	 */
 	private function _getServer($hash = '', $low = 0, $high = 0){
