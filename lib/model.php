@@ -21,6 +21,7 @@ abstract class core_model{
     public function __construct(){
         if(!$this->dbConfig) $this->dbConfig = core::getConfig('db_config');
         $this->adapter = core_database_factory::getInstance('pdo',$this->dbConfig);
+        $this->cache = core_cache_factory::getInstance('filesystem');
     }
 
     public function getAdapter(){
