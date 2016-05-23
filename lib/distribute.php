@@ -5,7 +5,7 @@
  * @author June Chen <594553417@qq.com>
  * @copyright  Copyright (c) 2016.
  */
-class distribute{
+class core_distribute{
 
 	//节点
 	private $nodes = array();

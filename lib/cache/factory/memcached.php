@@ -1,35 +1,34 @@
 <?php
 /**
- * Memcached缓存
+ * Memcache
  *
  * @author chenjun <594553417@qq.com>
  * @copyright  Copyright (c) 2008-2015 Technologies Inc.
 */
 class core_cache_factory_memcached extends core_cache_abstract implements core_cache_interface{
-    private $prefix;
-    private $obj;
+    private $instance;
     
     public function __construct($params = array()){
-        if(!isset($this->obj) || $this->obj == ''){
-            $hosts = array();
-            $this->obj = new Memcached;
-            if( $params['host'] != '' ){
-                $config = explode(',',$params['host']);
-                foreach($config as $v){
-                    $v = trim($v);
-                    $tmp = explode(':', $v);
-                    $hosts[] = array($tmp[0],$tmp[1]);
-                    core_debug::info('add memcached server: '.$v);
-                }
-                $this->obj->addServers($hosts);
-            }else{
-                throw new Exception('can\'t load cache_memcache_host, please check it.');
+        $hosts = array();
+        if( $params['host'] != '' ){
+            $config = explode(',',$params['host']);
+            foreach($config as $v){
+                $v = trim($v);
+                $tmp = explode(':', $v);
+                $hosts[] = array($tmp[0],$tmp[1]);
+                core_debug::info('add memcached server: '.$v);
             }
+            $this->getInstance()->addServers($hosts);
+        }else{
+            throw new Exception('can\'t load cache_memcache_host, please check it.');
         }
     }
 
-    public function getObj(){
-        return $this->obj;
+    public function getInstance(){
+        if(!is_object($this->instance) || $this->instance == ''){
+            $this->instance = new Memcached;
+        }
+        return $this->instance;
     }
 
     /**
@@ -41,9 +40,8 @@ class core_cache_factory_memcached extends core_cache_abstract implements core_c
 	 * @return bool
 	 */
     public function set($key = '',$value = '',$overdueTime = 0){
-        core_debug::setCounter('cache_set');
         $key = $this->getKey($key);
-        return $this->getObj()->set($key, $value, $overdueTime);
+        return $this->getInstance()->set($key, $value, $overdueTime);
     }
 
     /**
@@ -54,9 +52,8 @@ class core_cache_factory_memcached extends core_cache_abstract implements core_c
 	 * @return data
 	 */
     public function get($key = '',$field = 'value'){
-        core_debug::setCounter('cache_get');
         $key = $this->getKey($key);
-        $value = $this->getObj()->get($key);
+        $value = $this->getInstance()->get($key);
         return $value;
     }
 
@@ -67,9 +64,8 @@ class core_cache_factory_memcached extends core_cache_abstract implements core_c
 	 * @return bool
 	 */
     public function del($key = ''){
-        core_debug::setCounter('cache_del');
         $key = $this->getKey($key);
-        return $this->getObj()->delete($key);
+        return $this->getInstance()->delete($key);
     }
 
     /**
@@ -78,20 +74,18 @@ class core_cache_factory_memcached extends core_cache_abstract implements core_c
 	 * @return bool
 	 */
     public function flush(){
-        core_debug::setCounter('cache_flush');
-        return $this->getObj()->flush();
+        return $this->getInstance()->flush();
     }
 
 
     public function increment($key = '', $offset = 1){
         $key = $this->getKey($key);
-        return $this->getObj()->increment($key,$offset);
+        return $this->getInstance()->increment($key,$offset);
     }
 
     public function add($key = '',$value = '',$overdueTime = 0){
-        core_debug::setCounter('cache_set');
         $key = $this->getKey($key);
-        return $this->getObj()->add($key, $value, $overdueTime);
+        return $this->getInstance()->add($key, $value, $overdueTime);
     }
 
 }

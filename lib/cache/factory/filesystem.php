@@ -6,23 +6,27 @@
  * @copyright  Copyright (c) 2008-2015 Technologies Inc.
 */
 class core_cache_factory_filesystem extends core_cache_abstract implements core_cache_interface{
-    private $prefix;
     private $savepath;
-    private $obj;
+    private $instance;
 
     public function getSavePath(){
         return $this->savepath;
     }
 
     public function __construct($params = array()){
-        $this->obj = core::instance('core_file');
-        if(!isset($params['cache_dir']) || !$this->obj->isDir($params['cache_dir'])){
+        if(!isset($params['cache_dir']) || !$this->getInstance()->isDir($params['cache_dir'])){
             $this->savepath = core::getConfig('cache_filesystem_dir');
         }else{
             $this->savepath = $params['cache_dir'];
         }
-        core_debug::info('set filesystem dir: '.$this->getSavePath());
-        
+        core_debug::info('set filesystem dir: '.$this->getSavePath());     
+    }
+
+    public function getInstance(){
+        if(!is_object($this->instance) || $this->instance == ''){
+            $this->instance = core::instance('core_file');
+        }
+        return $this->instance;
     }
 
     /**
@@ -35,7 +39,6 @@ class core_cache_factory_filesystem extends core_cache_abstract implements core_
 	 */
     public function set($key = '',$value = '',$overdueTime = ''){
         if($key == '') return false;
-        core_debug::setCounter('cache_set');
         $key = $this->getKey($key);
         $array = serialize(array(
             'value'=>$value,
@@ -45,8 +48,8 @@ class core_cache_factory_filesystem extends core_cache_abstract implements core_
 
         $value = '<?php exit; ?>'.$array;
         $file = $this->getSavePath().$key.'.php';
-        if( $this->obj->isDir($this->getSavePath()) || $this->obj->mk($this->getSavePath()) ){
-            $result = $this->obj->write($file,$value);
+        if( $this->getInstance()->isDir($this->getSavePath()) || $this->getInstance()->mk($this->getSavePath()) ){
+            $result = $this->getInstance()->write($file,$value);
             if( $result ) return true;
             else return false;
         }else{
@@ -63,11 +66,10 @@ class core_cache_factory_filesystem extends core_cache_abstract implements core_
 	 */
     public function get($key = '',$field = 'value'){
         if( $key == '' ) return null;
-        core_debug::setCounter('cache_get');
         $key = $this->getKey($key);
         $file = $this->getSavePath().$key.'.php';
         if( file_exists($file) ){
-            $value = $this->obj->read($file);
+            $value = $this->getInstance()->read($file);
             $value = substr($value,14);
             $value = unserialize($value);
             return $field == '*' ? $value : $value[$field];
@@ -84,11 +86,10 @@ class core_cache_factory_filesystem extends core_cache_abstract implements core_
 	 */
     public function del($key = ''){
         if($key == '') return false;
-        core_debug::setCounter('cache_del');
         $key = $this->getKey($key);
         $file = $this->getSavePath().$key.'.php';
         if( file_exists($file) ){
-            $this->obj->del($file);
+            $this->getInstance()->del($file);
         }
         return true;
     }
@@ -99,8 +100,7 @@ class core_cache_factory_filesystem extends core_cache_abstract implements core_
 	 * @return bool
 	 */
     public function flush(){
-       core_debug::setCounter('cache_flush');
-       return $this->obj->clearRecur($this->getSavePath());
+       return $this->getInstance()->clearRecur($this->getSavePath());
     }
 
 }
